@@ -1,7 +1,6 @@
-# Glint
-HSC Software Engineering AT2 - Web App
+# HSC Software Engineering AT2 - Glint
 
-# App Description
+## App Description
 
 Glint is a writing tool designed to be totally distraction-free, but its main feature is this "Ghost Writer" engine.
 
