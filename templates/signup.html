@@ -1,0 +1,60 @@
+<!-- Extend base.html to inherit navbar, flash messages, and overall structure -->
+{% extends "base.html" %}
+
+<!-- Override the default title block for SEO and browser tab display -->
+{% block title %}Sign Up - Glint{% endblock %}
+
+<!-- Main content block for signup page -->
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <!-- Page heading for user orientation -->
+        <h2>Create Account</h2>
+
+        <!--
+        Signup form using POST method for security
+        action="{{ url_for('signup') }}" ensures form submits to /signup route
+        Data is sent securely in request body, not URL
+        -->
+        <form method="POST" action="{{ url_for('signup') }}">
+            <!-- Username input field -->
+            <div class="form-group">
+                <label for="username">Username</label>
+                <!--
+                - type="text" for username input
+                - id="username" connects label to input for accessibility (clicking label focuses input)
+                - name="username" is the key Flask retrieves via request.form.get('username')
+                - required attribute prevents submission with empty username
+                - autofocus puts cursor in this field immediately for better UX
+                -->
+                <input type="text" id="username" name="username" required autofocus>
+
+                <!--
+                Small hint text to inform users about admin role assignment
+                This relates to the logic in app.py: role = 'admin' if 'admin' in username.lower() else 'user'
+                -->
+                <small>Tip: Include 'admin' in username for admin access</small>
+            </div>
+
+            <!-- Password input field -->
+            <div class="form-group">
+                <label for="password">Password</label>
+                <!--
+                - type="password" masks the input for security
+                - name="password" matches request.form.get('password') in app.py
+                - required ensures user cannot submit without password
+                - minlength="6" enforces minimum password length for basic security
+                  (HTML5 validation happens before form submission)
+                -->
+                <input type="password" id="password" name="password" required minlength="6">
+            </div>
+
+            <!-- Submit button to create new account -->
+            <button type="submit" class="btn-primary">Sign Up</button>
+        </form>
+
+        <!-- Footer link to login page for existing users -->
+        <p class="auth-footer">Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+    </div>
+</div>
+{% endblock %}

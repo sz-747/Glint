@@ -1,0 +1,63 @@
+<!-- Extend base.html to inherit navbar, flash messages, and overall structure -->
+{% extends "base.html" %}
+
+<!-- Override the default title block for SEO and browser tab display -->
+{% block title %}Login - Glint{% endblock %}
+
+<!-- Main content block for login page -->
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <!-- Page heading for user orientation -->
+        <h2>Login to Glint</h2>
+
+        <!--
+        Login form using POST method for security (passwords should never be in URL)
+        action="{{ url_for('login') }}" ensures form submits to the correct route
+        even if URL structure changes
+        -->
+        <form method="POST" action="{{ url_for('login') }}">
+            <!-- Username input field -->
+            <div class="form-group">
+                <label for="username">Username</label>
+                <!--
+                - type="text" for username input
+                - id="username" links label to input for accessibility
+                - name="username" is the key Flask uses to retrieve data via request.form.get('username')
+                - required attribute provides HTML5 validation
+                - autofocus automatically focuses this field when page loads for better UX
+                -->
+                <input type="text" id="username" name="username" required autofocus>
+            </div>
+
+            <!-- Password input field -->
+            <div class="form-group">
+                <label for="password">Password</label>
+                <!--
+                - type="password" masks input for security
+                - name="password" matches the key used in app.py: request.form.get('password')
+                - required ensures user cannot submit empty password
+                -->
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <!-- Remember Me checkbox for persistent login sessions -->
+            <div class="form-group checkbox">
+                <!--
+                - type="checkbox" creates a tickable box
+                - name="remember" matches request.form.get('remember') in app.py
+                - When checked, Flask-Login will keep user logged in across browser sessions
+                -->
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">Remember Me</label>
+            </div>
+
+            <!-- Submit button to trigger form POST request -->
+            <button type="submit" class="btn-primary">Login</button>
+        </form>
+
+        <!-- Footer link to signup page for users without accounts -->
+        <p class="auth-footer">Don't have an account? <a href="{{ url_for('signup') }}">Sign up here</a></p>
+    </div>
+</div>
+{% endblock %}

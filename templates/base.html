@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Dynamic page title using Jinja2 block - defaults to "Glint" if not overridden -->
+    <title>{% block title %}Glint{% endblock %}</title>
+
+    <!-- Link to external CSS file using Flask's url_for() for proper static file routing -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Navigation bar with conditional rendering based on authentication status -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <!-- ✨ emoji represents the "sparkle" theme of the Glint app -->
+            <h1>✨ Glint</h1>
+        </div>
+
+        <div class="nav-links">
+            <!-- Check if user is authenticated using Flask-Login's current_user object -->
+            {% if current_user.is_authenticated %}
+                <!-- Role-based navigation: Admin users see different links than regular users -->
+                {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin') }}">Admin Panel</a>
+                {% else %}
+                    <!-- Regular users see Dashboard and Editor links -->
+                    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('editor') }}">Editor</a>
+                {% endif %}
+                <!-- Logout link displays username for personalization -->
+                <a href="{{ url_for('logout') }}">Logout ({{ current_user.username }})</a>
+            {% else %}
+                <!-- Unauthenticated users only see Login and Sign Up links -->
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('signup') }}">Sign Up</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Main content container for page content -->
+    <div class="container">
+        <!-- Flash message display system for user feedback -->
+        <!-- get_flashed_messages(with_categories=true) retrieves messages with their category (success, error, etc.) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <!-- Loop through each flash message and display with appropriate styling class -->
+                {% for category, message in messages %}
+                    <!-- CSS class 'alert-success' or 'alert-error' will style the message appropriately -->
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Content block where child templates inject their specific content -->
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Link to external JavaScript file for future interactive functionality -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
