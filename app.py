@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User
 
 app = Flask(__name__)
@@ -12,7 +12,6 @@ app.config['SECRET_KEY'] = 'your-secret-key-here'  # Required for sessions and C
 
 # Initialize extensions
 db.init_app(app)
-bcrypt = Bcrypt(app)  # Initialize bcrypt for password hashing
 login_manager = LoginManager(app)  # Initialize Flask-Login
 login_manager.login_view = 'login'  # Redirect to login page if user is not authenticated
 
@@ -49,7 +48,7 @@ def signup():
     User registration route.
     - GET: Display signup form
     - POST: Create new user account with hashed password
-    Security: Uses bcrypt for password hashing with automatic salting
+    Security: Uses Werkzeug password hashing with automatic salting
     """
     if request.method == 'POST':
         username = request.form.get('username')
@@ -70,9 +69,8 @@ def signup():
         # This is a simple role assignment logic for demonstration
         role = 'admin' if 'admin' in username.lower() else 'user'
 
-        # Hash password with bcrypt (includes automatic salting)
-        # decode('utf-8') converts bytes to string for database storage
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        # Hash password for secure database storage
+        hashed_password = generate_password_hash(password)
 
         # Create new user
         new_user = User(username=username, password_hash=hashed_password, role=role)
@@ -90,7 +88,7 @@ def login():
     User login route.
     - GET: Display login form
     - POST: Authenticate user and create session
-    Security: Uses bcrypt to verify password hash
+    Security: Verifies password hashes using Werkzeug
     """
     if request.method == 'POST':
         username = request.form.get('username')
@@ -100,9 +98,8 @@ def login():
         # Find user by username
         user = User.query.filter_by(username=username).first()
 
-        # Verify password using bcrypt
-        # check_password_hash compares the plain password with the stored hash
-        if user and bcrypt.check_password_hash(user.password_hash, password):
+        # Verify password hash against submitted password
+        if user and check_password_hash(user.password_hash, password):
             # Log the user in and create a session
             login_user(user, remember=remember)
             flash('Logged in successfully!', 'success')
