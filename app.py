@@ -140,10 +140,6 @@ def dashboard():
 @app.route('/admin')
 @login_required  # Requires user to be logged in
 def admin():
-    """
-    Admin panel - placeholder for Task 3.2
-    Only accessible to users with admin role
-    """
     if current_user.role != 'admin':
         flash('Access denied. Admin privileges required.', 'error')
         return redirect(url_for('dashboard'))
