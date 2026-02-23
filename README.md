@@ -6,4 +6,22 @@ Glint is a writing tool designed to be totally distraction-free, but its main fe
 
 The idea is that instead of using generic AI like ChatGPT, which can sound AI slop(ish), Glint learns from you. You upload your past essays or notes, and the app uses a local algorithm to analyze your specific tone and writing style. Then, while you're typing, it offers autocomplete suggestions that actually sound like something you would write.
 
-Technically, it’s a full-stack app using Python (Flask) and Vanilla JavaScript. I’m building the intelligence engine from scratch using local databases rather than external APIs, so it’s completely private and fast.
+Technically, it's a full-stack app using Python (Flask) and Vanilla JavaScript. I'm building the intelligence engine from scratch using local databases rather than external APIs, so it's completely private and fast.
+
+## Local Setup
+
+Use the project virtual environment so all Flask dependencies are available.
+
+```powershell
+# from repo root
+.\venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python app.py
+```
+
+If you prefer `py`, install dependencies with:
+
+```powershell
+py -m pip install -r requirements.txt
+py app.py
+```
