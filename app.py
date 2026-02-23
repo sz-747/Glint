@@ -1,7 +1,11 @@
+from pathlib import Path
+
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User
+from werkzeug.utils import secure_filename
+
+from models import db, User, Document
 
 app = Flask(__name__)
 
@@ -133,9 +137,116 @@ def logout():
 @login_required  # Requires user to be logged in
 def dashboard():
     """
-    User dashboard - placeholder for Task 1.4
+    User dashboard with document list and selected document editor.
     """
-    return f"<h1>Welcome {current_user.username}!</h1><p>Dashboard coming soon...</p><a href='/logout'>Logout</a>"
+    selected_doc_id = request.args.get('doc_id', type=int)
+    documents = (
+        Document.query
+        .filter_by(user_id=current_user.id)
+        .order_by(Document.last_modified.desc())
+        .all()
+    )
+
+    selected_document = None
+    if documents:
+        if selected_doc_id is not None:
+            selected_document = next((doc for doc in documents if doc.id == selected_doc_id), None)
+            if selected_document is None:
+                flash('Requested document was not found.', 'error')
+        if selected_document is None:
+            selected_document = documents[0]
+
+    return render_template(
+        'dashboard.html',
+        documents=documents,
+        selected_document=selected_document
+    )
+
+
+@app.route('/document/new', methods=['POST'])
+@login_required
+def new_document():
+    """Create a new empty document for the current user."""
+    title = request.form.get('title', '').strip() or 'Untitled Document'
+    document = Document(user_id=current_user.id, title=title, content='', word_count=0)
+    db.session.add(document)
+    db.session.commit()
+    flash(f'Document "{title}" created.', 'success')
+    return redirect(url_for('dashboard', doc_id=document.id))
+
+
+@app.route('/document/<int:doc_id>/update', methods=['POST'])
+@login_required
+def update_document(doc_id):
+    """Update title/content for a document the current user owns."""
+    document = Document.query.get_or_404(doc_id)
+    if document.user_id != current_user.id:
+        flash('Unauthorized document access.', 'error')
+        return redirect(url_for('dashboard'))
+
+    title = request.form.get('title', '').strip() or 'Untitled Document'
+    content = request.form.get('content', '')
+    word_count = len(content.split())
+
+    document.title = title
+    document.content = content
+    document.word_count = word_count
+    db.session.commit()
+
+    flash('Document saved.', 'success')
+    return redirect(url_for('dashboard', doc_id=document.id))
+
+
+@app.route('/document/delete/<int:doc_id>', methods=['POST'])
+@login_required
+def delete_document(doc_id):
+    """Delete a document if it belongs to the current user."""
+    document = Document.query.get_or_404(doc_id)
+    if document.user_id != current_user.id:
+        flash('Unauthorized document access.', 'error')
+        return redirect(url_for('dashboard'))
+
+    title = document.title
+    db.session.delete(document)
+    db.session.commit()
+    flash(f'Document "{title}" deleted.', 'success')
+    return redirect(url_for('dashboard'))
+
+
+@app.route('/document/upload', methods=['POST'])
+@login_required
+def upload_document():
+    """
+    Upload a .txt file and create a document from its contents.
+    """
+    file = request.files.get('file')
+    if file is None or file.filename is None or file.filename.strip() == '':
+        flash('Please choose a text file to upload.', 'error')
+        return redirect(url_for('dashboard'))
+
+    filename = secure_filename(file.filename)
+    if not filename.lower().endswith('.txt'):
+        flash('Only .txt files are allowed.', 'error')
+        return redirect(url_for('dashboard'))
+
+    raw_bytes = file.read()
+    content = raw_bytes.decode('utf-8', errors='ignore').strip()
+    if not content:
+        flash('Uploaded file is empty.', 'error')
+        return redirect(url_for('dashboard'))
+
+    title = Path(filename).stem or 'Uploaded Document'
+    document = Document(
+        user_id=current_user.id,
+        title=title,
+        content=content,
+        word_count=len(content.split())
+    )
+    db.session.add(document)
+    db.session.commit()
+
+    flash(f'Uploaded "{filename}" as a new document.', 'success')
+    return redirect(url_for('dashboard', doc_id=document.id))
 
 @app.route('/admin')
 @login_required  # Requires user to be logged in

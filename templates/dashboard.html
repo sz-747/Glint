@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Glint{% endblock %}
+{% block container_class %}container-dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell" data-dashboard-shell>
+  <aside class="panel panel-left" data-panel="left">
+    <div class="panel-header">
+      <h2 class="panel-title">Files</h2>
+      <button
+        type="button"
+        class="panel-toggle"
+        data-target="left"
+        aria-expanded="true"
+        aria-label="Toggle files panel"
+      >
+        <span>&#9664;</span>
+      </button>
+    </div>
+    <div class="panel-body">
+      <form method="POST" action="{{ url_for('new_document') }}" class="new-doc-form">
+        <input
+          type="text"
+          name="title"
+          placeholder="New document title"
+          maxlength="200"
+        />
+        <button type="submit" class="btn btn-primary">Create</button>
+      </form>
+
+      {% if documents %}
+      <ul class="document-list">
+        {% for doc in documents %}
+        <li class="document-item {% if selected_document and doc.id == selected_document.id %}active{% endif %}">
+          <a href="{{ url_for('dashboard', doc_id=doc.id) }}" class="document-link">
+            <strong>{{ doc.title }}</strong>
+            <span>{{ doc.word_count }} words</span>
+          </a>
+          <form
+            method="POST"
+            action="{{ url_for('delete_document', doc_id=doc.id) }}"
+            onsubmit="return confirm('Delete {{ doc.title }}?');"
+          >
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="muted">No documents yet. Create one to start writing.</p>
+      {% endif %}
+    </div>
+  </aside>
+
+  <main class="panel panel-center">
+    {% if selected_document %}
+    <form
+      method="POST"
+      action="{{ url_for('update_document', doc_id=selected_document.id) }}"
+      class="editor-form"
+    >
+      <div class="editor-header">
+        <input
+          type="text"
+          name="title"
+          value="{{ selected_document.title }}"
+          class="editor-title"
+          maxlength="200"
+          required
+        />
+        <button type="submit" class="btn btn-success">Save</button>
+      </div>
+
+      <textarea
+        name="content"
+        class="writing-area"
+        data-doc-content
+        placeholder="Start writing..."
+      >{{ selected_document.content }}</textarea>
+
+      <div class="editor-meta">
+        <span><strong data-word-count>{{ selected_document.word_count }}</strong> words</span>
+        <span>Last updated {{ selected_document.last_modified.strftime('%b %d, %Y %I:%M %p') }}</span>
+      </div>
+    </form>
+    {% else %}
+    <section class="empty-editor">
+      <h2>No document selected</h2>
+      <p>Create a document from the left panel or upload a `.txt` file from the right panel.</p>
+    </section>
+    {% endif %}
+  </main>
+
+  <aside class="panel panel-right" data-panel="right">
+    <div class="panel-header">
+      <h2 class="panel-title">Upload</h2>
+      <button
+        type="button"
+        class="panel-toggle"
+        data-target="right"
+        aria-expanded="true"
+        aria-label="Toggle upload panel"
+      >
+        <span>&#9654;</span>
+      </button>
+    </div>
+    <div class="panel-body">
+      <form
+        method="POST"
+        action="{{ url_for('upload_document') }}"
+        enctype="multipart/form-data"
+        class="upload-form"
+      >
+        <label for="file">Import document (.txt)</label>
+        <input id="file" type="file" name="file" accept=".txt" required />
+        <button type="submit" class="btn btn-primary">Upload</button>
+      </form>
+      <p class="muted">Uploaded files become editable documents in your file list.</p>
+    </div>
+  </aside>
+</div>
+{% endblock %}
