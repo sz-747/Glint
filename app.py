@@ -115,9 +115,10 @@ def signup():
             flash('Username already exists. Please choose another.', 'error')
             return redirect(url_for('signup'))
 
-        # Determine role: if username contains 'admin', make admin
-        # This is a simple role assignment logic for demonstration
-        role = 'admin' if 'admin' in username.lower() else 'user'
+        # Get role from the signup form dropdown
+        role = request.form.get('role', 'user')
+        if role not in ('user', 'admin'):
+            role = 'user'
 
         # Hash password for secure database storage
         hashed_password = generate_password_hash(password)

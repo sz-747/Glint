@@ -33,7 +33,15 @@
                 Small hint text to inform users about admin role assignment
                 This relates to the logic in app.py: role = 'admin' if 'admin' in username.lower() else 'user'
                 -->
-                <small>Tip: Include 'admin' in username for admin access</small>
+            </div>
+
+            <!-- Role selection dropdown -->
+            <div class="form-group">
+                <label for="role">Account Type</label>
+                <select id="role" name="role" required>
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
             </div>
 
             <!-- Password input field -->
