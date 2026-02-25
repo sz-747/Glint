@@ -341,6 +341,34 @@ body {
   resize: vertical;
 }
 
+.ghost-suggestion {
+  margin: 0 1rem 0.85rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px dashed #9bb2d6;
+  border-radius: 8px;
+  background: #f5f8ff;
+  color: #1e3a6d;
+}
+
+.ghost-label {
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.35rem;
+}
+
+.ghost-text {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-bottom: 0.25rem;
+}
+
+.ghost-hint {
+  font-size: 0.78rem;
+  color: #496289;
+}
+
 .editor-meta {
   padding: 0.85rem 1rem;
   border-top: 1px solid var(--border);
