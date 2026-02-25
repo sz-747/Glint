@@ -302,6 +302,70 @@ def admin():
         return redirect(url_for('dashboard'))
     return f"<h1>Admin Panel</h1><p>Welcome {current_user.username}</p><a href='/logout'>Logout</a>"
 
+
+# ============================================
+# Admin Quote Management
+# ============================================
+
+@app.route('/admin/quotes/add', methods=['POST'])
+@login_required
+def admin_add_quote():
+    """
+    Admin-only route to add a quote with analysis chunks.
+    Blocks duplicate normalized quotes; merges new chunks into existing quotes.
+    """
+    if current_user.role != 'admin':
+        return jsonify({"error": "Admin privileges required."}), 403
+
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Invalid JSON payload."}), 400
+
+    quote_text = (data.get('quote_text') or '').strip()
+    source_label = (data.get('source_label') or '').strip() or None
+    analysis_chunks = data.get('analysis_chunks', [])
+
+    if not quote_text:
+        return jsonify({"error": "quote_text is required."}), 400
+    if not isinstance(analysis_chunks, list) or not analysis_chunks:
+        return jsonify({"error": "analysis_chunks must be a non-empty list of strings."}), 400
+
+    normalized = normalize_text(quote_text)
+    existing = QuoteEntry.query.filter_by(quote_normalized=normalized).first()
+
+    if existing:
+        # Merge: add only new chunks
+        existing_texts = {normalize_text(c.chunk_text) for c in existing.analysis_chunks}
+        added = 0
+        for chunk_str in analysis_chunks:
+            chunk_str = str(chunk_str).strip()
+            if not chunk_str:
+                continue
+            if normalize_text(chunk_str) not in existing_texts:
+                db.session.add(AnalysisChunk(quote_id=existing.id, chunk_text=chunk_str))
+                existing_texts.add(normalize_text(chunk_str))
+                added += 1
+        db.session.commit()
+        return jsonify({"status": "merged", "quote_id": existing.id, "chunks_added": added})
+
+    quote = QuoteEntry(
+        user_id=current_user.id,
+        quote_text=quote_text,
+        quote_normalized=normalized,
+        source_label=source_label
+    )
+    db.session.add(quote)
+    db.session.flush()  # get quote.id before adding chunks
+
+    for chunk_str in analysis_chunks:
+        chunk_str = str(chunk_str).strip()
+        if chunk_str:
+            db.session.add(AnalysisChunk(quote_id=quote.id, chunk_text=chunk_str))
+
+    db.session.commit()
+    return jsonify({"status": "created", "quote_id": quote.id, "chunks_added": len(analysis_chunks)})
+
+
 # ============================================
 # Database Initialization
 # ============================================
