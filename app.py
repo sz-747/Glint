@@ -202,10 +202,15 @@ def dashboard():
         if selected_document is None:
             selected_document = documents[0]
 
+    total_quotes = QuoteEntry.query.count()
+    total_chunks = AnalysisChunk.query.count()
+
     return render_template(
         'dashboard.html',
         documents=documents,
-        selected_document=selected_document
+        selected_document=selected_document,
+        total_quotes=total_quotes,
+        total_chunks=total_chunks
     )
 
 
