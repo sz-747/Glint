@@ -367,6 +367,69 @@ def admin_add_quote():
 
 
 # ============================================
+# Suggestion API
+# ============================================
+
+@app.route('/api/suggest-analysis', methods=['POST'])
+@login_required
+def suggest_analysis():
+    """
+    Low-latency endpoint for editor-side analysis suggestion retrieval.
+    Accepts editor text, runs quote matching, returns best analysis chunk.
+    """
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"suggestion": None})
+
+    text = data.get('text', '')
+    recent = extract_recent_window(text)
+    match = find_quote_match(recent)
+
+    if match is None:
+        return jsonify({"suggestion": None, "quote_id": None, "analysis_chunk_id": None, "score": None, "match_type": None})
+
+    chunk = (
+        AnalysisChunk.query
+        .filter_by(quote_id=match["quote_id"])
+        .order_by(AnalysisChunk.quality_score.desc())
+        .first()
+    )
+
+    if chunk is None:
+        return jsonify({"suggestion": None, "quote_id": match["quote_id"], "analysis_chunk_id": None, "score": match["score"], "match_type": match["match_type"]})
+
+    return jsonify({
+        "suggestion": chunk.chunk_text,
+        "quote_id": match["quote_id"],
+        "analysis_chunk_id": chunk.id,
+        "score": match["score"],
+        "match_type": match["match_type"]
+    })
+
+
+@app.route('/api/log-suggestion', methods=['POST'])
+@login_required
+def log_suggestion():
+    """
+    Records suggestion acceptance/display events for analytics.
+    """
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"status": "ok"})
+
+    log = SuggestionLog(
+        user_id=current_user.id,
+        quote_id=data.get('quote_id'),
+        analysis_chunk_id=data.get('analysis_chunk_id'),
+        typed_context=data.get('typed_context'),
+        accepted=bool(data.get('accepted', False))
+    )
+    db.session.add(log)
+    db.session.commit()
+    return jsonify({"status": "ok"})
+
+
+# ============================================
 # Database Initialization
 # ============================================
 
