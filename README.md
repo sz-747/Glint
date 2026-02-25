@@ -2,11 +2,18 @@
 
 ## App Description
 
-Glint is a writing tool designed to be totally distraction-free, but its main feature is this "Ghost Writer" engine.
+Glint is a writing tool with a distraction-free editor and a local "Ghost Writer" helper.
 
-The idea is that instead of using generic AI like ChatGPT, which can sound AI slop(ish), Glint learns from you. You upload your past essays or notes, and the app uses a local algorithm to analyze your specific tone and writing style. Then, while you're typing, it offers autocomplete suggestions that actually sound like something you would write.
+Phase 2 now uses a **quote-to-analysis retrieval engine** (pivot from n-gram generation).  
+When a user types a known quote (exact, in-progress prefix, or fuzzy typo match), the app retrieves a mapped analysis sentence from SQLite and shows it as ghost text in the dashboard editor.
 
-Technically, it's a full-stack app using Python (Flask) and Vanilla JavaScript. I'm building the intelligence engine from scratch using local databases rather than external APIs, so it's completely private and fast.
+Current Ghost Writer behavior:
+- Live suggestion API: `POST /api/suggest-analysis`
+- In-editor ghost suggestion rendering with debounce
+- `Tab` to accept suggestion, `Esc` to dismiss
+- Suggestion interaction logging via `POST /api/log-suggestion`
+
+This keeps suggestions deterministic, fast, and private without external AI APIs.
 
 ## Local Setup
 
@@ -16,12 +23,30 @@ Use the project virtual environment so all Flask dependencies are available.
 # from repo root
 .\venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-python app.py
 ```
 
 If you prefer `py`, install dependencies with:
 
 ```powershell
 py -m pip install -r requirements.txt
+```
+
+Load starter quote-analysis rows into SQLite once:
+
+```powershell
+.\venv\Scripts\python.exe scripts\backfill_quotes.py
+```
+
+Then run the app:
+
+```powershell
+python app.py
+```
+
+```powershell
 py app.py
 ```
+
+Notes:
+- App startup now creates tables but does not auto-seed quote data.
+- If `quote_entry` is empty, suggestion APIs return no analysis until quotes are backfilled or added via admin endpoints.
