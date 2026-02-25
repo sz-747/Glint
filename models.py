@@ -17,6 +17,8 @@ class User(db.Model, UserMixin):
     # Relationships
     style_models = db.relationship('StyleModel', backref='user', lazy=True, cascade='all, delete-orphan')
     documents = db.relationship('Document', backref='author', lazy=True, cascade='all, delete-orphan')
+    quote_entries = db.relationship('QuoteEntry', backref='user', lazy=True, cascade='all, delete-orphan')
+    suggestion_logs = db.relationship('SuggestionLog', backref='user', lazy=True, cascade='all, delete-orphan')
 
 class Document(db.Model):
     """
@@ -41,3 +43,45 @@ class StyleModel(db.Model):
     model_data = db.Column(db.Text, nullable=False)  # JSON-encoded n-gram data
     name = db.Column(db.String(100), nullable=False)
     trained_at = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp for when model was trained
+
+
+class QuoteEntry(db.Model):
+    """
+    Stores a canonical quote with its normalized form for fast lookup.
+    Optionally linked to a user who added it (NULL for system-seeded quotes).
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    quote_text = db.Column(db.Text, nullable=False)
+    quote_normalized = db.Column(db.String(500), nullable=False, index=True, unique=True)
+    source_label = db.Column(db.String(200), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationship to analysis chunks
+    analysis_chunks = db.relationship('AnalysisChunk', backref='quote_entry', lazy=True, cascade='all, delete-orphan')
+
+
+class AnalysisChunk(db.Model):
+    """
+    Stores a single analysis paragraph linked to a QuoteEntry.
+    quality_score allows ranking when multiple chunks exist for one quote.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    quote_id = db.Column(db.Integer, db.ForeignKey('quote_entry.id'), nullable=False)
+    chunk_text = db.Column(db.Text, nullable=False)
+    quality_score = db.Column(db.Float, default=1.0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class SuggestionLog(db.Model):
+    """
+    Records each suggestion event for analytics and future personalization.
+    accepted=True when user presses Tab, False when suggestion is shown but dismissed.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    quote_id = db.Column(db.Integer, nullable=True)
+    analysis_chunk_id = db.Column(db.Integer, nullable=True)
+    typed_context = db.Column(db.Text, nullable=True)
+    accepted = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
