@@ -59,6 +59,7 @@
       method="POST"
       action="{{ url_for('update_document', doc_id=selected_document.id) }}"
       class="editor-form"
+      data-doc-id="{{ selected_document.id }}"
     >
       <div class="editor-header">
         <input
@@ -78,6 +79,12 @@
         data-doc-content
         placeholder="Start writing..."
       >{{ selected_document.content }}</textarea>
+
+      <div class="ghost-suggestion" data-ghost-suggestion hidden>
+        <div class="ghost-label">Suggested analysis</div>
+        <div class="ghost-text" data-ghost-text></div>
+        <div class="ghost-hint">Tab: accept | Esc: dismiss</div>
+      </div>
 
       <div class="editor-meta">
         <span><strong data-word-count>{{ selected_document.word_count }}</strong> words</span>
