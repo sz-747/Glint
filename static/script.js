@@ -52,10 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let activeRequest = null;
   let lastShownLogKey = '';
 
-  const updateWordCount = () => {
+    const updateWordCount = () => {
     const words = textArea.value.trim().match(/\S+/g);
-    wordCount.textContent = words ? String(words.length) : '0';
-  };
+      wordCount.textContent = words ? String(words.length) : '0';
+    };
 
   const clearSuggestion = () => {
     suggestionState.quoteId = null;
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     suggestionState.matchType = null;
     if (ghostText) {
       ghostText.textContent = '';
-    }
+        }
     if (ghostBox) {
       ghostBox.hidden = true;
     }

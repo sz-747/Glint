@@ -1,0 +1,108 @@
+{% extends "base.html" %} {% block title %}Admin Panel - Glint{% endblock %} {%
+block content %}
+<!-- Admin Dashboard - restricted to users with role='admin' via @admin_required decorator -->
+<div class="admin-container">
+  <!-- Page header -->
+  <div class="admin-header">
+    <h2>Administrator Dashboard</h2>
+    <p class="subtitle">System Overview &amp; User Management</p>
+  </div>
+
+  <!-- System Statistics Cards -->
+  <!-- Aggregated counts queried in the admin() route and passed via stats dict -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">U</div>
+      <div class="stat-info">
+        <h3>{{ stats.total_users }}</h3>
+        <p>Total Users</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">D</div>
+      <div class="stat-info">
+        <h3>{{ stats.total_documents }}</h3>
+        <p>Total Documents</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">Q</div>
+      <div class="stat-info">
+        <h3>{{ stats.total_quotes }}</h3>
+        <p>Total Quotes</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">W</div>
+      <div class="stat-info">
+        <h3>{{ "{:,}".format(stats.total_words) }}</h3>
+        <p>Total Words Written</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">S</div>
+      <div class="stat-info">
+        <h3>{{ stats.total_suggestions }}</h3>
+        <p>Suggestion Events</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Management Table -->
+  <!-- Lists all registered users with role badges, document counts, and delete actions -->
+  <div class="admin-card">
+    <h3>User Management</h3>
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+
+            <th>Documents</th>
+            <th>Quotes</th>
+
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users if user.role != 'admin' %}
+          <tr>
+            <td>
+              <strong>{{ user.username }}</strong>
+              {% if user.id == current_user.id %}
+              <!-- Badge to identify the currently logged-in admin -->
+              <span class="badge badge-you">You</span>
+              {% endif %}
+            </td>
+            <td>{{ user.documents|length }}</td>
+            <td>{{ user.quote_entries|length }}</td>
+            <td>
+              {% if user.id != current_user.id %}
+              <!-- Delete form uses POST to prevent CSRF via GET; includes JS confirmation -->
+              <form
+                method="POST"
+                action="{{ url_for('delete_user', user_id=user.id) }}"
+                style="display: inline"
+                onsubmit="return confirm('Delete user {{ user.username }}? This will also delete all their documents and data.');"
+              >
+                <button type="submit" class="btn btn-danger btn-sm">
+                  Delete
+                </button>
+              </form>
+              {% else %}
+              <!-- Admins cannot delete themselves to prevent lockout -->
+              <span class="muted">--</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

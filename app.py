@@ -337,7 +337,7 @@ def admin():
     all_users = User.query.order_by(User.id).all()
 
     # Aggregate system-wide statistics for the dashboard overview
-    total_users = User.query.count()
+    total_users = User.query.filter_by(role='user').count()
     total_documents = Document.query.count()
     total_quotes = QuoteEntry.query.count()
     total_chunks = AnalysisChunk.query.count()
