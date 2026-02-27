@@ -1,3 +1,29 @@
+"""
+Glint - Quote Analysis Retrieval Application
+
+A distraction-free writing environment with quote-triggered analysis suggestions.
+Uses deterministic retrieval (exact/prefix match) against stored quote-analysis mappings.
+
+Routes:
+    /                        - Home page (redirects based on auth status)
+    /signup                  - User registration
+    /login                   - User authentication
+    /logout                  - User logout
+    /dashboard               - User document management (CRUD)
+    /document/new            - Create a new document
+    /document/<id>/update    - Save document content
+    /document/delete/<id>    - Delete a document
+    /document/upload         - Upload a .txt file as a document
+    /admin                   - Administrator panel (admin only)
+    /admin/delete_user/<id>  - Delete a user account (admin only)
+    /admin/quotes/add        - Add/merge quote-analysis entries (admin only)
+    /api/suggest-analysis    - Analysis suggestion endpoint (POST, JSON)
+    /api/log-suggestion      - Suggestion usage logging endpoint (POST, JSON)
+
+Author: Steve
+Date: February 2025
+"""
+
 import re
 from pathlib import Path
 from functools import wraps
