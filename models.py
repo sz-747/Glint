@@ -16,7 +16,6 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
-    style_models = db.relationship('StyleModel', backref='user', lazy=True, cascade='all, delete-orphan')
     documents = db.relationship('Document', backref='author', lazy=True, cascade='all, delete-orphan')
     quote_entries = db.relationship('QuoteEntry', backref='user', lazy=True, cascade='all, delete-orphan')
     suggestion_logs = db.relationship('SuggestionLog', backref='user', lazy=True, cascade='all, delete-orphan')
@@ -33,17 +32,6 @@ class Document(db.Model):
     word_count = db.Column(db.Integer, default=0)
     last_modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class StyleModel(db.Model):
-    """
-    StyleModel for storing trained n-gram models.
-    Each user can have multiple style models trained from different text sources.
-    """
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    model_data = db.Column(db.Text, nullable=False)  # JSON-encoded n-gram data
-    name = db.Column(db.String(100), nullable=False)
-    trained_at = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp for when model was trained
 
 
 class QuoteEntry(db.Model):
