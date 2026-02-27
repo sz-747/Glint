@@ -598,6 +598,134 @@ body {
   color: #fff;
 }
 
+/* ============================================
+   Hamburger Menu (mobile only)
+   ============================================ */
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  gap: 5px;
+}
+
+.hamburger span {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background: var(--text-main);
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+
+.hamburger:hover span {
+  background: var(--brand);
+}
+
+/* ============================================
+   Responsive Breakpoints
+   ============================================ */
+
+@media (max-width: 768px) {
+  /* Show hamburger, hide inline nav */
+  .hamburger {
+    display: flex;
+  }
+
+  /* Nav drawer slides in from right */
+  .nav-links {
+    position: fixed;
+    top: 60px;
+    right: -100%;
+    width: 70%;
+    max-width: 300px;
+    height: calc(100vh - 60px);
+    background: var(--bg-card);
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    box-shadow: -5px 0 20px rgba(15, 23, 42, 0.12);
+    transition: right 0.3s ease;
+    z-index: 999;
+    gap: 0;
+  }
+
+  .nav-links.active {
+    right: 0;
+  }
+
+  .nav-links a {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 1rem;
+  }
+
+  .nav-links a:last-child {
+    border-bottom: none;
+  }
+
+  /* General layout */
+  .container {
+    padding: 1rem;
+  }
+
+  /* Auth pages */
+  .auth-card {
+    padding: 1.5rem;
+  }
+
+  /* Editor */
+  .editor-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .writing-area {
+    font-size: 1rem;
+    min-height: 400px;
+  }
+
+  /* Dashboard document items */
+  .document-item {
+    gap: 0.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-brand h1 {
+    font-size: 1.2rem;
+  }
+
+  .admin-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+  }
+
+  .stat-icon {
+    font-size: 1.2rem;
+    width: 36px;
+    height: 36px;
+  }
+
+  .stat-info h3 {
+    font-size: 1.3rem;
+  }
+
+  .error-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .error-card h1 {
+    font-size: 4rem;
+  }
+}
+
 @media (max-width: 1024px) {
   .dashboard-shell {
     grid-template-columns: 1fr;

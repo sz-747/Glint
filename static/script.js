@@ -1,3 +1,24 @@
+// Hamburger menu toggle for mobile navigation
+document.addEventListener('DOMContentLoaded', () => {
+  const hamburger = document.getElementById('hamburger');
+  const navLinks = document.getElementById('nav-links');
+
+  if (hamburger && navLinks) {
+    hamburger.addEventListener('click', () => {
+      const isOpen = navLinks.classList.toggle('active');
+      hamburger.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    // Close drawer when clicking anywhere outside the nav
+    document.addEventListener('click', (event) => {
+      if (!hamburger.contains(event.target) && !navLinks.contains(event.target)) {
+        navLinks.classList.remove('active');
+        hamburger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   const shell = document.querySelector('[data-dashboard-shell]');
   if (!shell) {

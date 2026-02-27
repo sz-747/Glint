@@ -17,12 +17,20 @@
         <h1>Glint</h1>
       </div>
 
-      <div class="nav-links">
+      <!-- Hamburger button: visible only on mobile (< 768px) -->
+      <button class="hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <div class="nav-links" id="nav-links">
         {% if current_user.is_authenticated %}
         {% if current_user.role == 'admin' %}
         <a href="{{ url_for('admin') }}">Admin Panel</a>
         {% else %}
         <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('editor') }}">Editor</a>
         {% endif %}
         <a href="{{ url_for('logout') }}"
           >Logout ({{ current_user.username }})</a
