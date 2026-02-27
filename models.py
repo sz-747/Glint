@@ -13,6 +13,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), default='user')  # 'user' or 'admin'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
     style_models = db.relationship('StyleModel', backref='user', lazy=True, cascade='all, delete-orphan')

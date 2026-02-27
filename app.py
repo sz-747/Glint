@@ -1,7 +1,8 @@
 import re
 from pathlib import Path
+from functools import wraps
 
-from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -29,6 +30,29 @@ def load_user(user_id):
     Called on each request to retrieve the current user from the session.
     """
     return User.query.get(int(user_id))
+
+
+def admin_required(f):
+    """
+    Decorator to require admin role for route access.
+    Must be used after @login_required so current_user is guaranteed loaded.
+    Returns 403 Forbidden if the authenticated user is not an admin.
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return redirect(url_for('login'))
+        if current_user.role != 'admin':
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+@app.errorhandler(403)
+def forbidden(e):
+    """Custom 403 Forbidden error page for unauthorized admin access attempts."""
+    return render_template('403.html'), 403
+
 
 # ============================================
 # Text Normalization & Matching Helpers
@@ -301,12 +325,62 @@ def upload_document():
     return redirect(url_for('dashboard', doc_id=document.id))
 
 @app.route('/admin')
-@login_required  # Requires user to be logged in
+@login_required
+@admin_required
 def admin():
-    if current_user.role != 'admin':
-        flash('Access denied. Admin privileges required.', 'error')
-        return redirect(url_for('dashboard'))
-    return f"<h1>Admin Panel</h1><p>Welcome {current_user.username}</p><a href='/logout'>Logout</a>"
+    """
+    Admin dashboard showing system statistics and user management table.
+    Protected by both @login_required and @admin_required decorators.
+    Non-admin users receive a 403 Forbidden response.
+    """
+    # Get all users ordered by ID for the management table
+    all_users = User.query.order_by(User.id).all()
+
+    # Aggregate system-wide statistics for the dashboard overview
+    total_users = User.query.count()
+    total_documents = Document.query.count()
+    total_quotes = QuoteEntry.query.count()
+    total_chunks = AnalysisChunk.query.count()
+    total_words = db.session.query(db.func.sum(Document.word_count)).scalar() or 0
+    total_suggestions = SuggestionLog.query.count()
+
+    stats = {
+        'total_users': total_users,
+        'total_documents': total_documents,
+        'total_quotes': total_quotes,
+        'total_chunks': total_chunks,
+        'total_words': total_words,
+        'total_suggestions': total_suggestions
+    }
+
+    return render_template('admin.html', users=all_users, stats=stats)
+
+
+@app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_user(user_id):
+    """
+    Delete a user and all their related data (documents, quotes, suggestion logs).
+    Cascade delete is handled by SQLAlchemy relationship configuration.
+    Admins cannot delete their own account to prevent lockout.
+    """
+    user = User.query.get_or_404(user_id)
+
+    # Safety check: prevent admin from deleting themselves
+    if user.id == current_user.id:
+        flash('Cannot delete your own account.', 'error')
+        return redirect(url_for('admin'))
+
+    username = user.username
+    try:
+        db.session.delete(user)
+        db.session.commit()
+        flash(f'User "{username}" deleted successfully.', 'success')
+    except Exception:
+        db.session.rollback()
+        flash(f'Error deleting user "{username}". Please try again.', 'error')
+    return redirect(url_for('admin'))
 
 
 # ============================================
@@ -315,13 +389,12 @@ def admin():
 
 @app.route('/admin/quotes/add', methods=['POST'])
 @login_required
+@admin_required
 def admin_add_quote():
     """
     Admin-only route to add a quote with analysis chunks.
     Blocks duplicate normalized quotes; merges new chunks into existing quotes.
     """
-    if current_user.role != 'admin':
-        return jsonify({"error": "Admin privileges required."}), 403
 
     data = request.get_json(silent=True)
     if not data:
