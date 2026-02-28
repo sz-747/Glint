@@ -331,7 +331,6 @@ def upload_document():
     flash(f'Uploaded "{filename}" as a new document.', 'success')
     return redirect(url_for('dashboard', doc_id=document.id))
 
-@app.route('/admin')
 @app.route('/admin/create_user', methods=['POST'])
 @login_required
 @admin_required
