@@ -18,7 +18,6 @@ class User(db.Model, UserMixin):
     # Relationships
     documents = db.relationship('Document', backref='author', lazy=True, cascade='all, delete-orphan')
     quote_entries = db.relationship('QuoteEntry', backref='user', lazy=True, cascade='all, delete-orphan')
-    suggestion_logs = db.relationship('SuggestionLog', backref='user', lazy=True, cascade='all, delete-orphan')
 
 class Document(db.Model):
     """
@@ -61,16 +60,3 @@ class AnalysisChunk(db.Model):
     quality_score = db.Column(db.Float, default=1.0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-
-class SuggestionLog(db.Model):
-    """
-    Records each suggestion event for analytics and future personalization.
-    accepted=True when user presses Tab, False when suggestion is shown but dismissed.
-    """
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    quote_id = db.Column(db.Integer, nullable=True)
-    analysis_chunk_id = db.Column(db.Integer, nullable=True)
-    typed_context = db.Column(db.Text, nullable=True)
-    accepted = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)

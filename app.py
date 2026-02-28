@@ -1,9 +1,6 @@
 """
 Glint - Quote Analysis Retrieval Application
 
-A distraction-free writing environment with quote-triggered analysis suggestions.
-Uses deterministic retrieval (exact/prefix match) against stored quote-analysis mappings.
-
 Routes:
     /                        - Home page (redirects based on auth status)
     /signup                  - User registration
@@ -17,8 +14,6 @@ Routes:
     /admin                   - Administrator panel (admin only)
     /admin/delete_user/<id>  - Delete a user account (admin only)
     /admin/quotes/add        - Add/merge quote-analysis entries (admin only)
-    /api/suggest-analysis    - Analysis suggestion endpoint (POST, JSON)
-    /api/log-suggestion      - Suggestion usage logging endpoint (POST, JSON)
 
 Author: Steve
 Date: February 2025
@@ -33,7 +28,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
-from models import db, User, Document, QuoteEntry, AnalysisChunk, SuggestionLog
+from models import db, User, Document, QuoteEntry, AnalysisChunk
 
 app = Flask(__name__)
 
@@ -78,51 +73,6 @@ def admin_required(f):
 def forbidden(e):
     """Custom 403 Forbidden error page for unauthorized admin access attempts."""
     return render_template('403.html'), 403
-
-
-# ============================================
-# Text Normalization & Matching Helpers
-# ============================================
-
-def normalize_text(text):
-    """Normalize text for deterministic quote matching: lowercase, strip punctuation, collapse whitespace."""
-    if text is None:
-        return ""
-    lowered = str(text).lower()
-    no_punctuation = re.sub(r"[^\w\s']", " ", lowered)
-    collapsed = re.sub(r"\s+", " ", no_punctuation).strip()
-    return collapsed
-
-
-def extract_recent_window(text, max_chars=220):
-    """Return the last max_chars characters of text for quote matching."""
-    if not text:
-        return ""
-    return text[-max_chars:]
-
-
-def find_quote_match(recent_text):
-    """
-    Match recent_text against stored quotes using exact substring and prefix strategies.
-    Returns a dict with quote_id, match_type, score on match, or None.
-    """
-    normalized = normalize_text(recent_text)
-    if not normalized:
-        return None
-
-    quotes = QuoteEntry.query.with_entities(QuoteEntry.id, QuoteEntry.quote_normalized).all()
-
-    # Exact: check if any stored normalized quote appears as a substring in the recent text
-    for quote_id, quote_norm in quotes:
-        if quote_norm in normalized:
-            return {"quote_id": quote_id, "match_type": "exact", "score": 1.0}
-
-    # Prefix: check if any stored quote starts with the recent text
-    for quote_id, quote_norm in quotes:
-        if quote_norm.startswith(normalized) and len(normalized) >= 4:
-            return {"quote_id": quote_id, "match_type": "prefix", "score": 0.9}
-
-    return None
 
 
 # ============================================
@@ -368,7 +318,6 @@ def admin():
     total_quotes = QuoteEntry.query.count()
     total_chunks = AnalysisChunk.query.count()
     total_words = db.session.query(db.func.sum(Document.word_count)).scalar() or 0
-    total_suggestions = SuggestionLog.query.count()
 
     stats = {
         'total_users': total_users,
@@ -376,7 +325,6 @@ def admin():
         'total_quotes': total_quotes,
         'total_chunks': total_chunks,
         'total_words': total_words,
-        'total_suggestions': total_suggestions
     }
 
     return render_template('admin.html', users=all_users, stats=stats)
@@ -412,6 +360,12 @@ def delete_user(user_id):
 # ============================================
 # Admin Quote Management
 # ============================================
+
+def normalize_text(text):
+    """Normalize text for quote matching: lowercase and collapse whitespace."""
+    if text is None:
+        return ""
+    return " ".join(str(text).lower().split())
 
 @app.route('/admin/quotes/add', methods=['POST'])
 @login_required
@@ -469,69 +423,6 @@ def admin_add_quote():
 
     db.session.commit()
     return jsonify({"status": "created", "quote_id": quote.id, "chunks_added": len(analysis_chunks)})
-
-
-# ============================================
-# Suggestion API
-# ============================================
-
-@app.route('/api/suggest-analysis', methods=['POST'])
-@login_required
-def suggest_analysis():
-    """
-    Low-latency endpoint for editor-side analysis suggestion retrieval.
-    Accepts editor text, runs quote matching, returns best analysis chunk.
-    """
-    data = request.get_json(silent=True)
-    if not data:
-        return jsonify({"suggestion": None})
-
-    text = data.get('text', '')
-    recent = extract_recent_window(text)
-    match = find_quote_match(recent)
-
-    if match is None:
-        return jsonify({"suggestion": None, "quote_id": None, "analysis_chunk_id": None, "score": None, "match_type": None})
-
-    chunk = (
-        AnalysisChunk.query
-        .filter_by(quote_id=match["quote_id"])
-        .order_by(AnalysisChunk.quality_score.desc())
-        .first()
-    )
-
-    if chunk is None:
-        return jsonify({"suggestion": None, "quote_id": match["quote_id"], "analysis_chunk_id": None, "score": match["score"], "match_type": match["match_type"]})
-
-    return jsonify({
-        "suggestion": chunk.chunk_text,
-        "quote_id": match["quote_id"],
-        "analysis_chunk_id": chunk.id,
-        "score": match["score"],
-        "match_type": match["match_type"]
-    })
-
-
-@app.route('/api/log-suggestion', methods=['POST'])
-@login_required
-def log_suggestion():
-    """
-    Records suggestion acceptance/display events for analytics.
-    """
-    data = request.get_json(silent=True)
-    if not data:
-        return jsonify({"status": "ok"})
-
-    log = SuggestionLog(
-        user_id=current_user.id,
-        quote_id=data.get('quote_id'),
-        analysis_chunk_id=data.get('analysis_chunk_id'),
-        typed_context=data.get('typed_context'),
-        accepted=bool(data.get('accepted', False))
-    )
-    db.session.add(log)
-    db.session.commit()
-    return jsonify({"status": "ok"})
 
 
 # ============================================
