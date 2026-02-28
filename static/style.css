@@ -89,6 +89,21 @@
   background: var(--bg-page);
 }
 
+.container-simple {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  min-height: calc(100vh - 80px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container-simple .auth-card {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 .auth-card {
   background: var(--bg-card);
   padding: 2rem;
@@ -152,6 +167,7 @@
 .form-group input[type="text"],
 .form-group input[type="password"],
 .form-group select,
+.form-group textarea,
 .new-doc-form input[type="text"],
 .editor-title,
 .writing-area {
@@ -613,10 +629,7 @@
   font-size: 0.9rem;
 }
 
-.quote-form {
-  display: grid;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+.quote-create-form {
 }
 
 .quote-input {
