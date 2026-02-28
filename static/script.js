@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const updateWordCount = () => {
-    const words = textArea.value.trim().match(/\S+/g);
+    const words = textArea.innerText.trim().match(/\S+/g);
     wordCount.textContent = words ? String(words.length) : '0';
   };
 
