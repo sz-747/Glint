@@ -177,6 +177,8 @@
   border-radius: 5px;
   font-size: 1rem;
   font-family: inherit;
+  resize: none;
+}
   transition:
     border-color 0.2s,
     box-shadow 0.2s;
