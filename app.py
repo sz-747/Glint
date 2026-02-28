@@ -429,6 +429,57 @@ def admin_add_quote():
 
 
 # ============================================
+# User Quote Management (CRUD)
+# ============================================
+
+@app.route('/quotes/add', methods=['POST'])
+@login_required
+def add_quote():
+    """
+    Allow users to add their own quotes.
+    """
+    quote_text = request.form.get('quote_text', '').strip()
+    source_label = request.form.get('source_label', '').strip() or None
+
+    if not quote_text:
+        flash('Quote text is required.', 'error')
+        return redirect(url_for('dashboard'))
+
+    normalized = normalize_text(quote_text)
+    existing = QuoteEntry.query.filter_by(quote_normalized=normalized).first()
+
+    if existing:
+        flash('This quote already exists in the bank.', 'error')
+        return redirect(url_for('dashboard'))
+
+    quote = QuoteEntry(
+        user_id=current_user.id,
+        quote_text=quote_text,
+        quote_normalized=normalized,
+        source_label=source_label
+    )
+    db.session.add(quote)
+    db.session.commit()
+
+    flash('Quote added successfully.', 'success')
+    return redirect(url_for('dashboard'))
+
+
+@app.route('/quotes/delete/<int:quote_id>', methods=['POST'])
+@login_required
+def delete_quote(quote_id):
+    """
+    Allow users to delete any quote (including seeded quotes).
+    """
+    quote = QuoteEntry.query.get_or_404(quote_id)
+
+    db.session.delete(quote)
+    db.session.commit()
+    flash('Quote deleted.', 'success')
+    return redirect(url_for('dashboard'))
+
+
+# ============================================
 # Quote Search API
 # ============================================
 
