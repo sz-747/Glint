@@ -256,9 +256,9 @@
 }
 
 .alert-success {
-  background: rgba(39, 103, 73, 0.15);
-  color: var(--success);
-  border: 1px solid var(--success);
+  background: rgba(184, 134, 11, 0.15);
+  color: var(--brand);
+  border: 1px solid var(--brand);
 }
 
 .alert-error {
