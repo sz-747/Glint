@@ -828,6 +828,28 @@
   font-size: 1.25rem;
 }
 
+.search-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.search-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 0.9rem;
+  flex: 1;
+  max-width: 300px;
+}
+
+.search-results-info {
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
 .table-responsive {
   overflow-x: auto;
 }

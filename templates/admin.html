@@ -49,6 +49,25 @@ block content %}
   <!-- Lists all registered users with role badges, document counts, and delete actions -->
   <div class="admin-card">
     <h3>User Management</h3>
+    
+    <!-- Search Form -->
+    <form method="GET" action="{{ url_for('admin') }}" class="search-form">
+      <input 
+        type="text" 
+        name="q" 
+        placeholder="Search users..." 
+        value="{{ search_query }}"
+        class="search-input"
+      >
+      <button type="submit" class="btn btn-sm">Search</button>
+      {% if search_query %}
+      <a href="{{ url_for('admin') }}" class="btn btn-sm btn-secondary">Clear</a>
+      {% endif %}
+    </form>
+    
+    {% if search_query %}
+    <p class="search-results-info">Showing results for: <strong>{{ search_query }}</strong></p>
+    {% endif %}
     <div class="table-responsive">
       <table class="admin-table">
         <thead>

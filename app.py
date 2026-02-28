@@ -340,8 +340,17 @@ def admin():
     Protected by both @login_required and @admin_required decorators.
     Non-admin users receive a 403 Forbidden response.
     """
+    # Get search query if provided
+    search_query = request.args.get('q', '').strip()
+
     # Get all users ordered by ID for the management table
-    all_users = User.query.order_by(User.id).all()
+    # Apply search filter if query provided
+    if search_query:
+        all_users = User.query.filter(
+            User.username.ilike(f'%{search_query}%')
+        ).order_by(User.id).all()
+    else:
+        all_users = User.query.order_by(User.id).all()
 
     # Aggregate system-wide statistics for the dashboard overview
     total_users = User.query.filter_by(role='user').count()
@@ -358,7 +367,7 @@ def admin():
         'total_words': total_words,
     }
 
-    return render_template('admin.html', users=all_users, stats=stats)
+    return render_template('admin.html', users=all_users, stats=stats, search_query=search_query)
 
 
 @app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
