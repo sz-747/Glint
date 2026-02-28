@@ -85,14 +85,26 @@ def forbidden(e):
 def home():
     """
     Home route - redirects authenticated users to their appropriate dashboard.
-    Unauthenticated users are redirected to login.
+    Unauthenticated users see the landing page.
     """
     if current_user.is_authenticated:
-        # Admin users go to admin panel, regular users go to dashboard
         if current_user.role == 'admin':
             return redirect(url_for('admin'))
         return redirect(url_for('dashboard'))
-    return redirect(url_for('login'))
+    return redirect(url_for('landing'))
+
+
+@app.route('/home')
+def landing():
+    """
+    Landing page route - displays marketing page for unauthenticated users.
+    Authenticated users are redirected to their dashboard.
+    """
+    if current_user.is_authenticated:
+        if current_user.role == 'admin':
+            return redirect(url_for('admin'))
+        return redirect(url_for('dashboard'))
+    return render_template('landing.html')
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -172,11 +184,11 @@ def login():
 def logout():
     """
     User logout route.
-    Destroys the user session and redirects to login page.
+    Destroys the user session and redirects to landing page.
     """
     logout_user()
     flash('Logged out successfully.', 'success')
-    return redirect(url_for('login'))
+    return redirect(url_for('landing'))
 
 # ============================================
 # Placeholder Routes (to be implemented later)
