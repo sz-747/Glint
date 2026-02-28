@@ -270,23 +270,23 @@
 .container-dashboard {
   max-width: 100%;
   padding: 14px 18px;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .dashboard-shell {
-  --left-width: 300px;
-  --right-width: 300px;
   display: grid;
-  grid-template-columns: var(--left-width) 1fr var(--right-width);
+  grid-template-columns: 250px 1rem 1fr 1rem 300px;
   gap: 14px;
-  min-height: calc(100vh - 130px);
+  height: 100%;
 }
 
 .dashboard-shell.left-collapsed {
-  --left-width: 64px;
+  grid-template-columns: 0 0 1fr 1rem 300px;
 }
 
 .dashboard-shell.right-collapsed {
-  --right-width: 64px;
+  grid-template-columns: 250px 1rem 1fr 1rem 0;
 }
 
 .panel {
@@ -297,6 +297,20 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+
+.panel-left {
+  grid-column: 1;
+  overflow-y: auto;
+}
+
+.panel-center {
+  grid-column: 3;
+}
+
+.panel-right {
+  grid-column: 5;
+  overflow-y: auto;
 }
 
 .panel-header {
@@ -919,7 +933,27 @@
 @media (max-width: 1024px) {
   .dashboard-shell {
     grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
     min-height: auto;
+    height: auto;
+  }
+
+  .panel-left,
+  .panel-center,
+  .panel-right {
+    grid-column: 1;
+  }
+
+  .panel-left {
+    grid-row: 1;
+  }
+
+  .panel-center {
+    grid-row: 2;
+  }
+
+  .panel-right {
+    grid-row: 3;
   }
 
   .panel.is-collapsed .panel-body,

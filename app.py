@@ -42,7 +42,7 @@ app.config['SECRET_KEY'] = 'your-secret-key-here'  # Required for sessions and C
 # Initialize extensions
 db.init_app(app)
 login_manager = LoginManager(app)  # Initialize Flask-Login
-login_manager.login_view = 'login'  # Redirect to login page if user is not authenticated
+login_manager.login_view = 'login'  # type: ignore[assignment]
 
 # User loader callback for Flask-Login
 # This tells Flask-Login how to reload the user object from the user ID stored in the session
@@ -148,8 +148,8 @@ def signup():
         hashed_password = generate_password_hash(password)
 
         # Create new user
-        new_user = User(username=username, password_hash=hashed_password, role=role, 
-                        name=name, gender=gender, email=email, address=address)
+        new_user = User(username=username, password_hash=hashed_password, role=role,  # type: ignore[arg-type]
+                        name=name, gender=gender, email=email, address=address)  # type: ignore[arg-type]
         db.session.add(new_user)
         db.session.commit()
 
@@ -169,13 +169,13 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        remember = request.form.get('remember', False)  # "Remember me" checkbox
+        remember = request.form.get('remember', False)  # type: ignore[assignment]
 
         # Find user by username
         user = User.query.filter_by(username=username).first()
 
         # Verify password hash against submitted password
-        if user and check_password_hash(user.password_hash, password):
+        if user and check_password_hash(user.password_hash, password or ''):
             # Log the user in and create a session
             login_user(user, remember=remember)
             flash('Logged in successfully!', 'success')
@@ -224,6 +224,8 @@ def dashboard():
         selected_document = next((doc for doc in documents if doc.id == selected_doc_id), None)
         if selected_document is None:
             flash('Requested document was not found.', 'error')
+    elif documents and selected_doc_id is None:
+        selected_document = documents[0]
 
     total_quotes = QuoteEntry.query.count()
     total_chunks = AnalysisChunk.query.count()
