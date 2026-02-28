@@ -910,11 +910,15 @@
 
 /* Hero Section */
 .hero {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  text-align: center;
   padding: 5rem 0 4rem;
+}
+
+.hero-content {
+  max-width: 700px;
 }
 
 .hero-badge {
@@ -947,12 +951,12 @@
   color: var(--text-muted);
   line-height: 1.6;
   margin-bottom: 2rem;
-  max-width: 480px;
 }
 
 .hero-actions {
   display: flex;
   gap: 1rem;
+  justify-content: center;
 }
 
 .btn-lg {
@@ -1041,26 +1045,6 @@
 
 .preview-line.long {
   width: 90%;
-}
-
-.preview-line.ghost {
-  background: rgba(43, 95, 201, 0.08);
-  border: 1px dashed var(--brand);
-  padding: 0.6rem 0.8rem;
-  position: relative;
-}
-
-.preview-line.ghost .ghost-text {
-  font-size: 0.85rem;
-  color: var(--brand);
-  font-style: italic;
-}
-
-.preview-line.ghost .ghost-hint {
-  display: block;
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  margin-top: 0.4rem;
 }
 
 /* Features Section */
