@@ -14,6 +14,7 @@ Routes:
     /admin                   - Administrator panel (admin only)
     /admin/delete_user/<id>  - Delete a user account (admin only)
     /admin/quotes/add        - Add/merge quote-analysis entries (admin only)
+    /api/quotes/search?q=    - Keyword search and ranking of quotes (JSON API)
 
 Author: Steve
 Date: February 2025
@@ -29,6 +30,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
 from models import db, User, Document, QuoteEntry, AnalysisChunk
+from quote_engine import search_quotes
 
 app = Flask(__name__)
 
@@ -195,23 +197,24 @@ def dashboard():
     )
 
     selected_document = None
-    if documents:
-        if selected_doc_id is not None:
-            selected_document = next((doc for doc in documents if doc.id == selected_doc_id), None)
-            if selected_document is None:
-                flash('Requested document was not found.', 'error')
+    if selected_doc_id is not None and documents:
+        selected_document = next((doc for doc in documents if doc.id == selected_doc_id), None)
         if selected_document is None:
-            selected_document = documents[0]
+            flash('Requested document was not found.', 'error')
 
     total_quotes = QuoteEntry.query.count()
     total_chunks = AnalysisChunk.query.count()
+
+    # Fetch all quotes with their analysis chunks for the quote bank panel
+    quotes = QuoteEntry.query.order_by(QuoteEntry.created_at.desc()).all()
 
     return render_template(
         'dashboard.html',
         documents=documents,
         selected_document=selected_document,
         total_quotes=total_quotes,
-        total_chunks=total_chunks
+        total_chunks=total_chunks,
+        quotes=quotes
     )
 
 
@@ -423,6 +426,26 @@ def admin_add_quote():
 
     db.session.commit()
     return jsonify({"status": "created", "quote_id": quote.id, "chunks_added": len(analysis_chunks)})
+
+
+# ============================================
+# Quote Search API
+# ============================================
+
+@app.route('/api/quotes/search')
+@login_required
+def api_search_quotes():
+    """
+    JSON API endpoint for the quote search engine.
+    Accepts a query string parameter 'q' and returns ranked quote results.
+    Protected by @login_required — unauthenticated requests are redirected.
+    """
+    query = request.args.get('q', '').strip()
+    if not query:
+        return jsonify([])
+
+    results = search_quotes(query, limit=5)
+    return jsonify(results)
 
 
 # ============================================
