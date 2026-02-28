@@ -88,6 +88,19 @@
   margin-bottom: 1rem;
 }
 
+.form-group + .form-group {
+  margin-top: 0.5rem;
+}
+
+.form-group:first-of-type {
+  margin-top: 0;
+}
+
+.auth-card .form-group:nth-of-type(5),
+.auth-card .form-group:nth-of-type(7) {
+  margin-top: 1.5rem;
+}
+
 .password-wrapper {
   position: relative;
 }
