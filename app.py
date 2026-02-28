@@ -332,6 +332,49 @@ def upload_document():
     return redirect(url_for('dashboard', doc_id=document.id))
 
 @app.route('/admin')
+@app.route('/admin/create_user', methods=['POST'])
+@login_required
+@admin_required
+def create_user():
+    """
+    Create a new user from the admin panel.
+    Accepts username and password, hashes the password before storing.
+    """
+    username = request.form.get('username', '').strip()
+    password = request.form.get('password', '')
+    role = request.form.get('role', 'user')
+
+    if not username or not password:
+        flash('Username and password are required.', 'error')
+        return redirect(url_for('admin'))
+
+    if len(password) < 6:
+        flash('Password must be at least 6 characters.', 'error')
+        return redirect(url_for('admin'))
+
+    existing_user = User.query.filter_by(username=username).first()
+    if existing_user:
+        flash('Username already exists.', 'error')
+        return redirect(url_for('admin'))
+
+    hashed_password = generate_password_hash(password)
+    new_user = User(
+        username=username,
+        password_hash=hashed_password,
+        role=role,
+        name=username,
+        gender='prefer_not_to_say',
+        email=f'{username}@local',
+        address='Not provided'
+    )
+    db.session.add(new_user)
+    db.session.commit()
+
+    flash(f'User "{username}" created successfully!', 'success')
+    return redirect(url_for('admin'))
+
+
+@app.route('/admin')
 @login_required
 @admin_required
 def admin():
@@ -340,7 +383,6 @@ def admin():
     Protected by both @login_required and @admin_required decorators.
     Non-admin users receive a 403 Forbidden response.
     """
-    # Get search query if provided
     search_query = request.args.get('q', '').strip()
 
     # Get all users ordered by ID for the management table

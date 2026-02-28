@@ -46,6 +46,33 @@ block content %}
   <div class="admin-card">
     <h3>User Management</h3>
     
+    <!-- Create User Form -->
+    <div class="create-user-form">
+      <h4>Create New User</h4>
+      <form method="POST" action="{{ url_for('create_user') }}" class="inline-form">
+        <input 
+          type="text" 
+          name="username" 
+          placeholder="Username" 
+          required
+          class="form-input"
+        >
+        <input 
+          type="password" 
+          name="password" 
+          placeholder="Password" 
+          required
+          minlength="6"
+          class="form-input"
+        >
+        <select name="role" class="form-input">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button type="submit" class="btn btn-sm">Create User</button>
+      </form>
+    </div>
+    
     <!-- Search Form -->
     <form method="GET" action="{{ url_for('admin') }}" class="search-form">
       <input 

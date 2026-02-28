@@ -857,6 +857,40 @@
   align-items: center;
 }
 
+.create-user-form {
+  background: var(--bg-elevated);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border);
+}
+
+.create-user-form h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.inline-form {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.form-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 0.9rem;
+  font-family: 'Playfair Display', serif;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--brand);
+}
+
 .search-input {
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
