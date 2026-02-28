@@ -265,7 +265,9 @@ def update_document(doc_id):
         return redirect(url_for('dashboard'))
 
     title = request.form.get('title', '').strip() or 'Untitled Document'
-    content = request.form.get('content', '')
+    content = request.form.get('content')
+    if content is None or content == '':
+        content = document.content
     plain_text = re.sub(r'<[^>]+>', ' ', content)
     word_count = len(plain_text.split())
 
