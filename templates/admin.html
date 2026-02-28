@@ -12,7 +12,6 @@ block content %}
   <!-- Aggregated counts queried in the admin() route and passed via stats dict -->
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-icon">U</div>
       <div class="stat-info">
         <h3>{{ stats.total_users }}</h3>
         <p>Total Users</p>
@@ -20,7 +19,6 @@ block content %}
     </div>
 
     <div class="stat-card">
-      <div class="stat-icon">D</div>
       <div class="stat-info">
         <h3>{{ stats.total_documents }}</h3>
         <p>Total Documents</p>
@@ -28,7 +26,6 @@ block content %}
     </div>
 
     <div class="stat-card">
-      <div class="stat-icon">Q</div>
       <div class="stat-info">
         <h3>{{ stats.total_quotes }}</h3>
         <p>Total Quotes</p>
@@ -36,7 +33,6 @@ block content %}
     </div>
 
     <div class="stat-card">
-      <div class="stat-icon">W</div>
       <div class="stat-info">
         <h3>{{ "{:,}".format(stats.total_words) }}</h3>
         <p>Total Words Written</p>
