@@ -80,12 +80,6 @@
         placeholder="Start writing..."
       >{{ selected_document.content }}</textarea>
 
-      <div class="ghost-suggestion" data-ghost-suggestion hidden>
-        <div class="ghost-label">Suggested analysis</div>
-        <div class="ghost-text" data-ghost-text></div>
-        <div class="ghost-hint">Tab: accept | Esc: dismiss</div>
-      </div>
-
       <div class="editor-meta">
         <span><strong data-word-count>{{ selected_document.word_count }}</strong> words</span>
         <span>Last updated {{ selected_document.last_modified.strftime('%b %d, %Y %I:%M %p') }}</span>
@@ -124,14 +118,6 @@
       </form>
       <p class="muted">Uploaded files become editable documents in your file list.</p>
 
-      <hr style="margin: 1rem 0; border-color: var(--border, #333);" />
-      <h3 style="margin-bottom: 0.5rem;">Quote Analysis</h3>
-      {% if total_quotes and total_quotes > 0 %}
-      <p><strong>{{ total_quotes }}</strong> quotes indexed</p>
-      <p><strong>{{ total_chunks }}</strong> analysis chunks available</p>
-      {% else %}
-      <p class="muted">No quote-analysis data loaded yet. An admin can seed quotes to enable ghost suggestions.</p>
-      {% endif %}
     </div>
   </aside>
 </div>
