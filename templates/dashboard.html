@@ -70,15 +70,23 @@
           maxlength="200"
           required
         />
+        <div class="format-toolbar">
+          <button type="button" class="format-btn" data-command="bold" title="Bold"><strong>B</strong></button>
+          <button type="button" class="format-btn" data-command="italic" title="Italic"><em>I</em></button>
+          <button type="button" class="format-btn" data-command="formatBlock" data-value="h2" title="Heading">H</button>
+          <button type="button" class="format-btn" data-command="insertUnorderedList" title="Bullet List">•</button>
+          <button type="button" class="format-btn" data-command="insertOrderedList" title="Numbered List">1.</button>
+        </div>
         <button type="submit" class="btn btn-success">Save</button>
       </div>
 
-      <textarea
+      <div
         name="content"
         class="writing-area"
         data-doc-content
+        contenteditable="true"
         placeholder="Start writing..."
-      >{{ selected_document.content }}</textarea>
+      >{{ selected_document.content }}</div>
 
       <div class="editor-meta">
         <span><strong data-word-count>{{ selected_document.word_count }}</strong> words</span>
@@ -107,22 +115,6 @@
       </button>
     </div>
     <div class="panel-body">
-      <form method="POST" action="{{ url_for('add_quote') }}" class="quote-form">
-        <textarea
-          name="quote_text"
-          placeholder="Enter a quote..."
-          class="quote-input"
-          required
-        ></textarea>
-        <input
-          type="text"
-          name="source_label"
-          placeholder="Source (optional)"
-          class="quote-source"
-        />
-        <button type="submit" class="btn btn-primary">Add Quote</button>
-      </form>
-
       {% if quotes %}
       <ul class="quote-list">
         {% for quote in quotes %}
@@ -142,7 +134,7 @@
         {% endfor %}
       </ul>
       {% else %}
-      <p class="muted">No quotes yet. Add your first quote above.</p>
+      <p class="muted">No quotes yet. <a href="{{ url_for('add_quote') }}">Add your first quote</a>.</p>
       {% endif %}
 
       <hr class="panel-divider" />
@@ -165,7 +157,33 @@
 {% endblock %}
 
 <script>
-  document.getElementById('file').addEventListener('change', function() {
-    if (this.files.length) this.closest('form').submit();
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('file').addEventListener('change', function() {
+      if (this.files.length) this.closest('form').submit();
+    });
+
+    document.querySelectorAll('.format-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const command = this.dataset.command;
+        const value = this.dataset.value || null;
+        document.execCommand(command, false, value);
+      });
+    });
+
+    const editorForm = document.querySelector('.editor-form');
+    if (editorForm) {
+      editorForm.addEventListener('submit', function(e) {
+        const editor = document.querySelector('.writing-area[contenteditable]');
+        if (editor) {
+          const hidden = document.createElement('input');
+          hidden.type = 'hidden';
+          hidden.name = 'content';
+          hidden.value = editor.innerHTML;
+          this.appendChild(hidden);
+        }
+      });
+    }
   });
 </script>

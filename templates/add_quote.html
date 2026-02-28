@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Add Quote - Glint{% endblock %}
+{% block container_class %}container-simple{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="page-header">
+    <h1>Add a Quote</h1>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+  </div>
+
+  <form method="POST" action="{{ url_for('add_quote') }}" class="quote-create-form">
+    <div class="form-group">
+      <label for="quote_text">Quote Text</label>
+      <textarea
+        id="quote_text"
+        name="quote_text"
+        class="form-control"
+        placeholder="Enter the quote..."
+        required
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="source_label">Source (optional)</label>
+      <input
+        type="text"
+        id="source_label"
+        name="source_label"
+        class="form-control"
+        placeholder="e.g. Author, Book Title"
+      />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Quote</button>
+  </form>
+</div>
+{% endblock %}
