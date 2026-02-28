@@ -295,18 +295,73 @@
 }
 
 .dashboard-shell {
-  display: grid;
-  grid-template-columns: 250px 1rem 1fr 1rem 300px;
-  gap: 14px;
+  display: flex;
   height: 100%;
+  position: relative;
+  gap: 0;
 }
 
-.dashboard-shell.left-collapsed {
-  grid-template-columns: 0 0 1fr 1rem 300px;
+.panel-left {
+  flex: 0 0 250px;
+  transition: flex 0.3s ease-in-out;
 }
 
-.dashboard-shell.right-collapsed {
-  grid-template-columns: 250px 1rem 1fr 1rem 0;
+.panel-center {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.panel-right {
+  flex: 0 0 300px;
+  transition: flex 0.3s ease-in-out;
+}
+
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  transition: width 0.3s ease, min-width 0.3s ease, border-radius 0.3s ease, transform 0.3s ease;
+}
+
+.panel-left.is-collapsed {
+  flex: 0 0 0;
+  border: none;
+  border-radius: 0;
+}
+
+.panel-right.is-collapsed {
+  flex: 0 0 0;
+  border: none;
+  border-radius: 0;
+}
+
+.panel-left,
+.panel-right {
+  overflow: hidden;
+  transition: flex 0.3s ease-in-out, border-radius 0.3s ease-in-out;
+}
+
+.panel-center {
+  transition: border-radius 0.3s ease-in-out;
+}
+
+.panel-left.is-collapsed + .panel-center {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.panel-center:has(+ .panel-right.is-collapsed) {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.panel-left.is-collapsed + .panel-center:has(+ .panel-right.is-collapsed) {
+  border-radius: 12px;
 }
 
 .panel {
@@ -320,16 +375,10 @@
 }
 
 .panel-left {
-  grid-column: 1;
   overflow-y: auto;
 }
 
-.panel-center {
-  grid-column: 3;
-}
-
 .panel-right {
-  grid-column: 5;
   overflow-y: auto;
 }
 
@@ -350,10 +399,27 @@
   border: 1px solid var(--border);
   background: #fff;
   color: var(--text-main);
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  z-index: 10;
+}
+
+.panel-toggle-left {
+  position: absolute;
+  right: -12px;
+  top: 12px;
+}
+
+.panel-toggle-right {
+  position: absolute;
+  left: -12px;
+  top: 12px;
 }
 
 .panel-body {
@@ -362,14 +428,9 @@
 }
 
 .panel.is-collapsed .panel-body,
-.panel.is-collapsed .panel-title {
-  display: none;
-}
-
+.panel.is-collapsed .panel-title,
 .panel.is-collapsed .panel-header {
-  border-bottom: 0;
-  justify-content: center;
-  padding: 0.75rem 0.5rem;
+  display: none;
 }
 
 .new-doc-form {

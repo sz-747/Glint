@@ -8,15 +8,6 @@
   <aside class="panel panel-left" data-panel="left">
     <div class="panel-header">
       <h2 class="panel-title">Files</h2>
-      <button
-        type="button"
-        class="panel-toggle"
-        data-target="left"
-        aria-expanded="true"
-        aria-label="Toggle files panel"
-      >
-        <span>&#9664;</span>
-      </button>
     </div>
     <div class="panel-body">
       <form method="POST" action="{{ url_for('new_document') }}" class="new-doc-form">
@@ -54,6 +45,24 @@
   </aside>
 
   <main class="panel panel-center">
+    <button
+      type="button"
+      class="panel-toggle panel-toggle-left"
+      data-target="left"
+      aria-expanded="true"
+      aria-label="Toggle files panel"
+    >
+      <span class="toggle-icon">&#9654;</span>
+    </button>
+    <button
+      type="button"
+      class="panel-toggle panel-toggle-right"
+      data-target="right"
+      aria-expanded="true"
+      aria-label="Toggle quotes panel"
+    >
+      <span class="toggle-icon">&#9664;</span>
+    </button>
     {% if selected_document %}
     <form
       method="POST"
@@ -105,15 +114,6 @@
   <aside class="panel panel-right" data-panel="right">
     <div class="panel-header">
       <h2 class="panel-title">Quotes</h2>
-      <button
-        type="button"
-        class="panel-toggle"
-        data-target="right"
-        aria-expanded="true"
-        aria-label="Toggle quotes panel"
-      >
-        <span>&#9654;</span>
-      </button>
     </div>
     <div class="panel-body">
       {% if quotes %}
@@ -147,6 +147,22 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.panel-toggle').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const target = this.dataset.target;
+        const panel = document.querySelector(`.panel-${target}`);
+        const isCollapsed = panel.classList.toggle('is-collapsed');
+        this.setAttribute('aria-expanded', !isCollapsed);
+        
+        const icon = this.querySelector('.toggle-icon');
+        if (target === 'left') {
+          icon.innerHTML = isCollapsed ? '&#9664;' : '&#9654;';
+        } else {
+          icon.innerHTML = isCollapsed ? '&#9654;' : '&#9664;';
+        }
+      });
+    });
+
     document.querySelectorAll('.format-btn').forEach(btn => {
       btn.addEventListener('click', function(e) {
         e.preventDefault();
