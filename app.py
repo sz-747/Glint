@@ -352,6 +352,9 @@ def admin():
     else:
         all_users = User.query.order_by(User.id).all()
 
+    # Get recent documents for overview (limit 50)
+    recent_documents = Document.query.order_by(Document.created_at.desc()).limit(50).all()
+
     # Aggregate system-wide statistics for the dashboard overview
     total_users = User.query.filter_by(role='user').count()
     total_documents = Document.query.count()
@@ -367,7 +370,7 @@ def admin():
         'total_words': total_words,
     }
 
-    return render_template('admin.html', users=all_users, stats=stats, search_query=search_query)
+    return render_template('admin.html', users=all_users, stats=stats, search_query=search_query, documents=recent_documents)
 
 
 @app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
@@ -394,6 +397,25 @@ def delete_user(user_id):
     except Exception:
         db.session.rollback()
         flash(f'Error deleting user "{username}". Please try again.', 'error')
+    return redirect(url_for('admin'))
+
+
+@app.route('/admin/delete_document/<int:doc_id>', methods=['POST'])
+@login_required
+@admin_required
+def admin_delete_document(doc_id):
+    """
+    Delete a document. Admins can delete any document.
+    """
+    document = Document.query.get_or_404(doc_id)
+    title = document.title
+    try:
+        db.session.delete(document)
+        db.session.commit()
+        flash(f'Document "{title}" deleted successfully.', 'success')
+    except Exception:
+        db.session.rollback()
+        flash(f'Error deleting document "{title}". Please try again.', 'error')
     return redirect(url_for('admin'))
 
 

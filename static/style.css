@@ -840,6 +840,7 @@
   border: 1px solid var(--border);
   border-radius: 5px;
   font-size: 0.9rem;
+  font-family: 'Playfair Display', serif;
   flex: 1;
   max-width: 300px;
 }
