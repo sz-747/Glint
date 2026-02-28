@@ -1131,18 +1131,35 @@
 .feature-icon {
   font-size: 2.5rem;
   margin-bottom: 1rem;
+  color: var(--brand);
+  border: 2px solid var(--brand);
+  border-radius: 12px;
+  padding: 8px;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.feature-icon svg {
+  stroke: #333;
 }
 
 .feature-card h3 {
   font-size: 1.15rem;
   margin-bottom: 0.75rem;
   color: var(--text-main);
+  text-align: center;
 }
 
 .feature-card p {
   font-size: 0.95rem;
   color: var(--text-muted);
   line-height: 1.5;
+  text-align: center;
 }
 
 /* CTA Section */
