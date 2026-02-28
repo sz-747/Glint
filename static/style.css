@@ -88,6 +88,39 @@
   margin-bottom: 1rem;
 }
 
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  padding-right: 2.5rem;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  font-size: 1.1rem;
+  padding: 0;
+}
+
+.password-wrapper input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+}
+
+.password-wrapper input::-webkit-credentials-auto-fill-button:hover {
+  visibility: visible;
+}
+
+.password-wrapper input::-ms-reveal {
+  display: none !important;
+}
+
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
