@@ -91,6 +91,7 @@
 
 .form-group input[type="text"],
 .form-group input[type="password"],
+.form-group select,
 .new-doc-form input[type="text"],
 .editor-title,
 .writing-area {
@@ -107,12 +108,13 @@
 }
 
 .form-group input:focus,
+.form-group select:focus,
 .new-doc-form input[type="text"]:focus,
 .editor-title:focus,
 .writing-area:focus {
   outline: none;
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(43, 95, 201, 0.15);
+  box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.15);
 }
 
 .form-group small {
