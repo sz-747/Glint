@@ -126,6 +126,7 @@
 
 .password-wrapper {
   position: relative;
+  width: 100%;
 }
 
 .password-wrapper input {
@@ -1385,4 +1386,101 @@
     max-width: 400px;
     margin: 0 auto;
   }
+}
+
+/* ===== Multi-step Signup ===== */
+.auth-card-wide {
+  max-width: 520px;
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 2rem;
+}
+
+.step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ccc;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+
+.step-circle.active {
+  background: var(--brand);
+}
+
+.step-circle.completed {
+  background: var(--brand-dark);
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: #ccc;
+  min-width: 60px;
+  transition: background 0.3s;
+}
+
+.step-line.completed {
+  background: var(--brand-dark);
+}
+
+.form-step {
+  display: none;
+}
+
+.form-step.active {
+  display: block;
+}
+
+.step-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  margin-top: -0.5rem;
+}
+
+.step-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.step-nav-end {
+  justify-content: flex-end;
+}
+
+.optional-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--bg-panel);
+  color: var(--text-muted);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 2px 7px;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
+/* Override auth-card full-width submit button for multi-step nav */
+.auth-card .step-nav .btn-primary {
+  width: auto;
+  margin-top: 0;
+}
+
+.auth-card .step-nav .btn-secondary {
+  width: auto;
+  margin-top: 0;
 }

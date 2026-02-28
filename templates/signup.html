@@ -7,94 +7,163 @@
 <!-- Main content block for signup page -->
 {% block content %}
 <div class="auth-container">
-    <div class="auth-card">
-        <!-- Page heading for user orientation -->
-        <h2>Create Account</h2>
+    <div class="auth-card auth-card-wide">
+        <!-- Step indicator: 3 circles connected by lines -->
+        <div class="step-indicator">
+            <div class="step-circle active" id="circle-1">1</div>
+            <div class="step-line" id="line-1"></div>
+            <div class="step-circle" id="circle-2">2</div>
+            <div class="step-line" id="line-2"></div>
+            <div class="step-circle" id="circle-3">3</div>
+        </div>
 
         <!--
-        Signup form using POST method for security
-        action="{{ url_for('signup') }}" ensures form submits to /signup route
-        Data is sent securely in request body, not URL
+        Signup form using POST method for security.
+        All steps are inside one form so all field values are submitted together.
         -->
-        <form method="POST" action="{{ url_for('signup') }}">
-            <!-- Role selection dropdown -->
-            <div class="form-group">
-                <label for="role">Account Type</label>
-                <select id="role" name="role" required>
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </div>
+        <form method="POST" action="{{ url_for('signup') }}" id="signup-form" novalidate>
 
-            <!-- Identity Group -->
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" name="name" required>
-            </div>
+            <!-- ===== STEP 1: Account details ===== -->
+            <div class="form-step active" id="step-1">
+                <h2>Create Account</h2>
+                <p class="step-subtitle">Let's start with the basics.</p>
 
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="text" id="email" name="email" required>
-            </div>
+                <!-- Account type selection -->
+                <div class="form-group">
+                    <label for="role">Account Type</label>
+                    <select id="role" name="role" required>
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="username">Username</label>
-                <!--
-                - type="text" for username input
-                - id="username" connects label to input for accessibility (clicking label focuses input)
-                - name="username" is the key Flask retrieves via request.form.get('username')
-                - required attribute prevents submission with empty username
-                - autofocus puts cursor in this field immediately for better UX
-                -->
-                <input type="text" id="username" name="username" required autofocus>
+                <!-- Full name -->
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required autofocus>
+                </div>
 
-                <!--
-                Small hint text to inform users about admin role assignment
-                This relates to the logic in app.py: role = 'admin' if 'admin' in username.lower() else 'user'
-                -->
-            </div>
+                <!-- Username -->
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
 
-            <!-- Profile Group -->
-            <div class="form-group">
-                <label for="gender">Gender <i>(optional)</i></label>
-                <select id="gender" name="gender">
-                    <option value="">Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                    <option value="prefer_not_to_say">Prefer not to say</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="address">Address <i>(optional)</i></label>
-                <input type="text" id="address" name="address">
-            </div>
-
-            <!-- Security Group -->
-            <div class="form-group">
-                <label for="password">Password</label>
-                <!--
-                - type="password" masks the input for security
-                - name="password" matches request.form.get('password') in app.py
-                - required ensures user cannot submit without password
-                - minlength="6" enforces minimum password length for basic security
-                  (HTML5 validation happens before form submission)
-                -->
-                <div class="password-wrapper">
-                    <input type="password" id="password" name="password" required minlength="6" autocomplete="new-password">
-                    <button type="button" class="password-toggle" onclick="togglePassword('password', this)">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    </button>
+                <div class="step-nav step-nav-end">
+                    <button type="button" class="btn-primary" onclick="nextStep(1)">Continue &rarr;</button>
                 </div>
             </div>
 
-            <!-- Submit button to create new account -->
-            <button type="submit" class="btn-primary">Sign Up</button>
+            <!-- ===== STEP 2: Security ===== -->
+            <div class="form-step" id="step-2">
+                <h2>Sign In Details</h2>
+                <p class="step-subtitle">How will you log in?</p>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="password-wrapper">
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                </div>
+
+                <!-- Password with visibility toggle -->
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" name="password" required minlength="6" autocomplete="new-password">
+                        <button type="button" class="password-toggle" onclick="togglePassword('password', this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="step-nav">
+                    <button type="button" class="btn-secondary" onclick="prevStep(2)">&larr; Back</button>
+                    <button type="button" class="btn-primary" onclick="nextStep(2)">Continue &rarr;</button>
+                </div>
+            </div>
+
+            <!-- ===== STEP 3: Optional profile info ===== -->
+            <div class="form-step" id="step-3">
+                <h2>Profile <span class="optional-badge">Optional</span></h2>
+                <p class="step-subtitle">Add a bit more about yourself — you can skip this.</p>
+
+                <!-- Gender (optional) -->
+                <div class="form-group">
+                    <label for="gender">Gender <i>(optional)</i></label>
+                    <select id="gender" name="gender">
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                        <option value="prefer_not_to_say">Prefer not to say</option>
+                    </select>
+                </div>
+
+                <!-- Address (optional) -->
+                <div class="form-group">
+                    <label for="address">Address <i>(optional)</i></label>
+                    <input type="text" id="address" name="address">
+                </div>
+
+                <div class="step-nav">
+                    <button type="button" class="btn-secondary" onclick="prevStep(3)">&larr; Back</button>
+                    <button type="submit" class="btn-primary">Sign Up</button>
+                </div>
+            </div>
+
         </form>
 
         <!-- Footer link to login page for existing users -->
         <p class="auth-footer">Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
     </div>
 </div>
+
+<script>
+    let currentStep = 1;
+
+    function showStep(n) {
+        // Hide all steps
+        document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+        // Show target step
+        document.getElementById('step-' + n).classList.add('active');
+
+        // Update step circles
+        for (let i = 1; i <= 3; i++) {
+            const circle = document.getElementById('circle-' + i);
+            circle.classList.remove('active', 'completed');
+            if (i < n) circle.classList.add('completed');
+            else if (i === n) circle.classList.add('active');
+        }
+
+        // Update connector lines
+        for (let i = 1; i <= 2; i++) {
+            const line = document.getElementById('line-' + i);
+            line.classList.toggle('completed', i < n);
+        }
+
+        currentStep = n;
+    }
+
+    function nextStep(fromStep) {
+        // Validate all required inputs in the current step
+        const step = document.getElementById('step-' + fromStep);
+        const inputs = step.querySelectorAll('input[required], select[required]');
+        let valid = true;
+
+        inputs.forEach(input => {
+            if (!input.checkValidity()) {
+                input.reportValidity();
+                valid = false;
+            }
+        });
+
+        if (valid) showStep(fromStep + 1);
+    }
+
+    function prevStep(fromStep) {
+        showStep(fromStep - 1);
+    }
+</script>
 {% endblock %}
