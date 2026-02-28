@@ -95,18 +95,59 @@
 
   <aside class="panel panel-right" data-panel="right">
     <div class="panel-header">
-      <h2 class="panel-title">Upload</h2>
+      <h2 class="panel-title">Quotes</h2>
       <button
         type="button"
         class="panel-toggle"
         data-target="right"
         aria-expanded="true"
-        aria-label="Toggle upload panel"
+        aria-label="Toggle quotes panel"
       >
         <span>&#9654;</span>
       </button>
     </div>
     <div class="panel-body">
+      <form method="POST" action="{{ url_for('add_quote') }}" class="quote-form">
+        <textarea
+          name="quote_text"
+          placeholder="Enter a quote..."
+          class="quote-input"
+          required
+        ></textarea>
+        <input
+          type="text"
+          name="source_label"
+          placeholder="Source (optional)"
+          class="quote-source"
+        />
+        <button type="submit" class="btn btn-primary">Add Quote</button>
+      </form>
+
+      {% if quotes %}
+      <ul class="quote-list">
+        {% for quote in quotes %}
+        <li class="quote-item">
+          <p class="quote-text">"{{ quote.quote_text }}"</p>
+          {% if quote.source_label %}
+          <p class="quote-source-label">&mdash; {{ quote.source_label }}</p>
+          {% endif %}
+          <form
+            method="POST"
+            action="{{ url_for('delete_quote', quote_id=quote.id) }}"
+            onsubmit="return confirm('Delete this quote?');"
+          >
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="muted">No quotes yet. Add your first quote above.</p>
+      {% endif %}
+
+      <hr class="panel-divider" />
+
+      <h3 class="upload-heading">Upload Document</h3>
       <form
         method="POST"
         action="{{ url_for('upload_document') }}"

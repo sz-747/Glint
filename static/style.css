@@ -410,6 +410,88 @@ body {
   font-size: 0.9rem;
 }
 
+.quote-form {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.quote-input {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 0.9rem;
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+}
+
+.quote-input:focus {
+  outline: none;
+  border-color: var(--brand);
+}
+
+.quote-source {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 0.85rem;
+}
+
+.quote-source:focus {
+  outline: none;
+  border-color: var(--brand);
+}
+
+.quote-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.quote-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  position: relative;
+}
+
+.quote-text {
+  font-size: 0.9rem;
+  color: var(--text-main);
+  margin: 0 0 0.3rem;
+  line-height: 1.4;
+}
+
+.quote-source-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+.quote-item .btn-danger {
+  margin-top: 0.5rem;
+}
+
+.panel-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5rem 0;
+}
+
+.upload-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--text-main);
+}
+
 .empty-editor {
   margin: auto;
   text-align: center;
