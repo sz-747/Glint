@@ -123,8 +123,8 @@ def signup():
         address = request.form.get('address')
 
         # Validate input
-        if not username or not password or not name or not gender or not email or not address:
-            flash('All fields are required.', 'error')
+        if not username or not password or not name or not email:
+            flash('All required fields must be filled.', 'error')
             return redirect(url_for('signup'))
 
         # Check if username already exists
