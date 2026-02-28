@@ -197,7 +197,17 @@ body {
 }
 
 .form-group.checkbox input[type="checkbox"] {
-  width: auto;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--brand);
+}
+
+.form-group.checkbox label {
+  cursor: pointer;
+  user-select: none;
+  color: #555;
 }
 
 .btn {

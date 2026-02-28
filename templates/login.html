@@ -41,13 +41,7 @@
                 <input type="password" id="password" name="password" required>
             </div>
 
-            <!-- Remember Me checkbox for persistent login sessions -->
             <div class="form-group checkbox">
-                <!--
-                - type="checkbox" creates a tickable box
-                - name="remember" matches request.form.get('remember') in app.py
-                - When checked, Flask-Login will keep user logged in across browser sessions
-                -->
                 <input type="checkbox" id="remember" name="remember">
                 <label for="remember">Remember Me</label>
             </div>
