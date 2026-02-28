@@ -124,13 +124,16 @@
           {% if quote.source_label %}
           <p class="quote-source-label">&mdash; {{ quote.source_label }}</p>
           {% endif %}
-          <form
-            method="POST"
-            action="{{ url_for('delete_quote', quote_id=quote.id) }}"
-            onsubmit="return confirm('Delete this quote?');"
-          >
-            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-          </form>
+          <div class="quote-actions">
+            <button type="button" class="btn btn-primary btn-sm" data-quote-text="{{ quote.quote_text }}" data-quote-source="{{ quote.source_label or '' }}" onclick="insertQuoteAtCursor(this)">Insert</button>
+            <form
+              method="POST"
+              action="{{ url_for('delete_quote', quote_id=quote.id) }}"
+              onsubmit="return confirm('Delete this quote?');"
+            >
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          </div>
         </li>
         {% endfor %}
       </ul>
@@ -144,6 +147,37 @@
   </aside>
 </div>
 {% endblock %}
+
+<script>
+  window.insertQuoteAtCursor = function(btn) {
+    const editor = document.querySelector('.writing-area[contenteditable]');
+    if (!editor) return;
+
+    const quoteText = btn.dataset.quoteText;
+    const sourceLabel = btn.dataset.quoteSource;
+    let insertText = '"' + quoteText + '"';
+    if (sourceLabel) {
+      insertText += ' (' + sourceLabel + ')';
+    }
+    insertText += ' ';
+
+    if (typeof window.getSelection !== 'undefined') {
+      const sel = window.getSelection();
+      if (sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(document.createTextNode(insertText));
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    } else if (typeof document.selection !== 'undefined') {
+      document.selection.createRange().text = insertText;
+    }
+
+    editor.focus();
+  };
+</script>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
