@@ -42,7 +42,7 @@ app.config['SECRET_KEY'] = 'your-secret-key-here'  # Required for sessions and C
 # Initialize extensions
 db.init_app(app)
 login_manager = LoginManager(app)  # Initialize Flask-Login
-login_manager.login_view = 'login'  # type: ignore[assignment]
+login_manager.login_view = 'login'
 
 # User loader callback for Flask-Login
 # This tells Flask-Login how to reload the user object from the user ID stored in the session
@@ -148,8 +148,8 @@ def signup():
         hashed_password = generate_password_hash(password)
 
         # Create new user
-        new_user = User(username=username, password_hash=hashed_password, role=role,  # type: ignore[arg-type]
-                        name=name, gender=gender, email=email, address=address)  # type: ignore[arg-type]
+        new_user = User(username=username, password_hash=hashed_password, role=role, 
+                        name=name, gender=gender, email=email, address=address)
         db.session.add(new_user)
         db.session.commit()
 
@@ -169,7 +169,7 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        remember = request.form.get('remember', False)  # type: ignore[assignment]
+        remember = request.form.get('remember', False)
 
         # Find user by username
         user = User.query.filter_by(username=username).first()
