@@ -30,6 +30,7 @@
         <a href="{{ url_for('admin') }}">Admin Panel</a>
         {% else %}
         <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('add_quote') }}">Add Quote</a>
         {% endif %}
         <a href="{{ url_for('logout') }}"
           >Logout ({{ current_user.username }})</a

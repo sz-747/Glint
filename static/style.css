@@ -34,6 +34,66 @@ body {
   padding: 20px;
 }
 
+.container-simple {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.page-content {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+  font-size: 1.5rem;
+}
+
+.quote-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.form-control {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(43, 95, 201, 0.1);
+}
+
+.quote-create-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
 .navbar {
   background: rgba(255, 255, 255, 0.96);
   padding: 1rem 2rem;
@@ -161,6 +221,23 @@ body {
 
 .btn-primary:hover {
   background: var(--brand-dark);
+}
+
+.btn-secondary {
+  background: var(--bg-panel);
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.65rem 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+  background: var(--border);
 }
 
 .auth-card .btn-primary {
@@ -325,6 +402,29 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
+.format-toolbar {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.format-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.format-btn:hover {
+  background: var(--bg-light);
+}
+
 .editor-title {
   font-size: 1.05rem;
   font-weight: 600;
@@ -338,6 +438,22 @@ body {
   line-height: 1.55;
   min-height: 320px;
   resize: vertical;
+  outline: none;
+}
+
+.writing-area:empty:before {
+  content: attr(placeholder);
+  color: var(--text-muted);
+}
+
+.writing-area h2 {
+  font-size: 1.4rem;
+  margin: 0.5rem 0;
+}
+
+.writing-area ul, .writing-area ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
 }
 
 .ghost-suggestion {

@@ -241,7 +241,8 @@ def update_document(doc_id):
 
     title = request.form.get('title', '').strip() or 'Untitled Document'
     content = request.form.get('content', '')
-    word_count = len(content.split())
+    plain_text = re.sub(r'<[^>]+>', ' ', content)
+    word_count = len(plain_text.split())
 
     document.title = title
     document.content = content
@@ -432,37 +433,38 @@ def admin_add_quote():
 # User Quote Management (CRUD)
 # ============================================
 
-@app.route('/quotes/add', methods=['POST'])
+@app.route('/quotes/new', methods=['GET', 'POST'])
 @login_required
 def add_quote():
-    """
-    Allow users to add their own quotes.
-    """
-    quote_text = request.form.get('quote_text', '').strip()
-    source_label = request.form.get('source_label', '').strip() or None
+    """Display the quote creation page or process quote submission."""
+    if request.method == 'POST':
+        quote_text = request.form.get('quote_text', '').strip()
+        source_label = request.form.get('source_label', '').strip() or None
 
-    if not quote_text:
-        flash('Quote text is required.', 'error')
+        if not quote_text:
+            flash('Quote text is required.', 'error')
+            return redirect(url_for('add_quote'))
+
+        normalized = normalize_text(quote_text)
+        existing = QuoteEntry.query.filter_by(quote_normalized=normalized).first()
+
+        if existing:
+            flash('This quote already exists in the bank.', 'error')
+            return redirect(url_for('add_quote'))
+
+        quote = QuoteEntry(
+            user_id=current_user.id,
+            quote_text=quote_text,
+            quote_normalized=normalized,
+            source_label=source_label
+        )
+        db.session.add(quote)
+        db.session.commit()
+
+        flash('Quote added successfully.', 'success')
         return redirect(url_for('dashboard'))
 
-    normalized = normalize_text(quote_text)
-    existing = QuoteEntry.query.filter_by(quote_normalized=normalized).first()
-
-    if existing:
-        flash('This quote already exists in the bank.', 'error')
-        return redirect(url_for('dashboard'))
-
-    quote = QuoteEntry(
-        user_id=current_user.id,
-        quote_text=quote_text,
-        quote_normalized=normalized,
-        source_label=source_label
-    )
-    db.session.add(quote)
-    db.session.commit()
-
-    flash('Quote added successfully.', 'success')
-    return redirect(url_for('dashboard'))
+    return render_template('add_quote.html')
 
 
 @app.route('/quotes/delete/<int:quote_id>', methods=['POST'])
