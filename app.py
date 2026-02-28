@@ -117,16 +117,26 @@ def signup():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        name = request.form.get('name')
+        gender = request.form.get('gender')
+        email = request.form.get('email')
+        address = request.form.get('address')
 
         # Validate input
-        if not username or not password:
-            flash('Username and password are required.', 'error')
+        if not username or not password or not name or not gender or not email or not address:
+            flash('All fields are required.', 'error')
             return redirect(url_for('signup'))
 
         # Check if username already exists
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
             flash('Username already exists. Please choose another.', 'error')
+            return redirect(url_for('signup'))
+
+        # Check if email already exists
+        existing_email = User.query.filter_by(email=email).first()
+        if existing_email:
+            flash('Email already registered. Please use another.', 'error')
             return redirect(url_for('signup'))
 
         # Get role from the signup form dropdown
@@ -138,7 +148,8 @@ def signup():
         hashed_password = generate_password_hash(password)
 
         # Create new user
-        new_user = User(username=username, password_hash=hashed_password, role=role)
+        new_user = User(username=username, password_hash=hashed_password, role=role, 
+                        name=name, gender=gender, email=email, address=address)
         db.session.add(new_user)
         db.session.commit()
 
