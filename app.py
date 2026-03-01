@@ -214,11 +214,11 @@ def login():
 
     return render_template('login.html')
 
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 @login_required  # Only authenticated users can logout
 def logout():
     """
-    User logout route.
+    User logout route (POST-only to prevent CSRF logout via embedded images/links).
     Destroys the user session and redirects to landing page.
     """
     logout_user()

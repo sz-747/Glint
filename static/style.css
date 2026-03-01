@@ -81,6 +81,29 @@
   border-color: var(--brand);
 }
 
+.nav-logout-form {
+  display: inline;
+}
+
+.nav-logout-btn {
+  background: none;
+  color: var(--brand);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.nav-logout-btn:hover {
+  background: var(--bg-panel);
+  border-color: var(--brand);
+}
+
 .auth-container {
   display: flex;
   justify-content: center;
@@ -1249,13 +1272,18 @@
     right: 0;
   }
 
-  .nav-links a {
+  .nav-links a,
+  .nav-links .nav-logout-btn {
     padding: 0.75rem 0;
     border-bottom: 1px solid var(--border);
+    border-radius: 0;
     font-size: 1rem;
+    width: 100%;
+    text-align: left;
   }
 
-  .nav-links a:last-child {
+  .nav-links a:last-child,
+  .nav-links .nav-logout-form:last-child .nav-logout-btn {
     border-bottom: none;
   }
 
