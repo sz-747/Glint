@@ -96,7 +96,7 @@
         data-doc-content
         contenteditable="true"
         placeholder="Start writing..."
-      >{{ selected_document.content }}</div>
+      >{{ selected_document.content | safe }}</div>
 
       <div class="editor-meta">
         <span><strong data-word-count>{{ selected_document.word_count }}</strong> words</span>
@@ -146,8 +146,6 @@
     </div>
   </aside>
 </div>
-{% endblock %}
-
 <script>
   window.insertQuoteAtCursor = function(btn) {
     const editor = document.querySelector('.writing-area[contenteditable]');
@@ -225,3 +223,4 @@
     }
   });
 </script>
+{% endblock %}

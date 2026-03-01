@@ -268,6 +268,7 @@ def update_document(doc_id):
     content = request.form.get('content')
     if content is None or content == '':
         content = document.content
+    content = content or ''
     plain_text = re.sub(r'<[^>]+>', ' ', content)
     word_count = len(plain_text.split())
 
