@@ -37,7 +37,7 @@
           <button type="button" class="nav-upload-btn" onclick="document.getElementById('nav-file').click()" title="Upload Document">↑</button>
         </form>
         <a href="{{ url_for('dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('add_quote') }}">Add Quote</a>
+        <a href="{{ url_for('quote_bank') }}">Quote Bank</a>
         {% endif %}
         <a href="{{ url_for('logout') }}"
           >Logout ({{ current_user.username }})</a
