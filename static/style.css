@@ -444,6 +444,25 @@
 .panel-body {
   padding: 0.9rem;
   overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.panel-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.panel-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.panel-body::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 3px;
+}
+
+.panel-body::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-muted);
 }
 
 .panel.is-collapsed .panel-body,
