@@ -156,13 +156,6 @@
           {% endif %}
           <div class="quote-actions">
             <button type="button" class="btn btn-primary btn-sm" data-quote-text="{{ quote.quote_text | e }}" data-quote-source="{{ (quote.source_label or '') | e }}" onclick="insertQuoteAtCursor(this)">Insert</button>
-            <form
-              method="POST"
-              action="{{ url_for('delete_quote', quote_id=quote.id) }}"
-              onsubmit="return confirm('Delete this quote?');"
-            >
-              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-            </form>
           </div>
         </li>
         {% endfor %}
