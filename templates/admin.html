@@ -46,47 +46,46 @@ block content %}
   <div class="admin-card">
     <h3>User Management</h3>
     
-    <!-- Create User Form -->
-    <div class="create-user-form">
-      <h4>Create New User</h4>
-      <form method="POST" action="{{ url_for('create_user') }}" class="inline-form">
-        <input 
-          type="text" 
-          name="username" 
-          placeholder="Username" 
-          required
-          class="form-input"
+    <!-- Search Form & Create User Button -->
+    <div class="search-form">
+      <form method="GET" action="{{ url_for('admin') }}" class="search-form-inner">
+        <input
+          type="text"
+          name="q"
+          placeholder="Search users..."
+          value="{{ search_query }}"
+          class="search-input"
         >
-        <input 
-          type="password" 
-          name="password" 
-          placeholder="Password" 
-          required
-          minlength="6"
-          class="form-input"
-        >
-        <select name="role" class="form-input">
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-        </select>
-        <button type="submit" class="btn btn-sm">Create User</button>
+        <button type="submit" class="btn btn-sm">Search</button>
+        {% if search_query %}
+        <a href="{{ url_for('admin') }}" class="btn btn-sm btn-secondary">Clear</a>
+        {% endif %}
       </form>
+      <div class="create-user-wrapper">
+        <button type="button" class="btn btn-sm" id="create-user-toggle">+ Create User</button>
+        <div class="create-user-popover" id="create-user-popover">
+          <form method="POST" action="{{ url_for('create_user') }}">
+            <input type="hidden" name="role" value="user">
+            <input
+              type="text"
+              name="username"
+              placeholder="Username"
+              required
+              class="form-input"
+            >
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              required
+              minlength="6"
+              class="form-input"
+            >
+            <button type="submit" class="btn btn-sm" style="width:100%">Create User</button>
+          </form>
+        </div>
+      </div>
     </div>
-    
-    <!-- Search Form -->
-    <form method="GET" action="{{ url_for('admin') }}" class="search-form">
-      <input 
-        type="text" 
-        name="q" 
-        placeholder="Search users..." 
-        value="{{ search_query }}"
-        class="search-input"
-      >
-      <button type="submit" class="btn btn-sm">Search</button>
-      {% if search_query %}
-      <a href="{{ url_for('admin') }}" class="btn btn-sm btn-secondary">Clear</a>
-      {% endif %}
-    </form>
     
     {% if search_query %}
     <p class="search-results-info">Showing results for: <strong>{{ search_query }}</strong></p>
@@ -124,7 +123,8 @@ block content %}
                 style="display: inline"
                 onsubmit="return confirm('Delete user {{ user.username }}? This will also delete all their documents and data.');"
               >
-                <button type="submit" class="btn btn-danger btn-sm">
+                <button type="submit" class="btn btn-icon btn-sm" title="Delete user">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                   Delete
                 </button>
               </form>
@@ -169,7 +169,8 @@ block content %}
                 style="display: inline"
                 onsubmit="return confirm('Delete document \"{{ doc.title }}\"?');"
               >
-                <button type="submit" class="btn btn-danger btn-sm">
+                <button type="submit" class="btn btn-icon btn-sm" title="Delete document">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                   Delete
                 </button>
               </form>
@@ -185,4 +186,15 @@ block content %}
     </div>
   </div>
 </div>
+<script>
+  const toggle = document.getElementById('create-user-toggle');
+  const popover = document.getElementById('create-user-popover');
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    popover.classList.toggle('active');
+  });
+  document.addEventListener('click', (e) => {
+    if (!popover.contains(e.target)) popover.classList.remove('active');
+  });
+</script>
 {% endblock %}
