@@ -139,10 +139,9 @@ def signup():
             flash('Email already registered. Please use another.', 'error')
             return redirect(url_for('signup'))
 
-        # Get role from the signup form dropdown
-        role = request.form.get('role', 'user')
-        if role not in ('user', 'admin'):
-            role = 'user'
+        # Hardcode role to 'user' — never trust client input for role assignment
+        # Admin accounts should only be created via /admin/create_user
+        role = 'user'
 
         # Hash password for secure database storage
         hashed_password = generate_password_hash(password)
