@@ -20,6 +20,7 @@ Author: Steve
 Date: February 2025
 """
 
+import os
 import re
 from pathlib import Path
 from functools import wraps
@@ -50,7 +51,9 @@ app = Flask(__name__)
 # Configure SQLite database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///glint.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'your-secret-key-here'  # Required for sessions and CSRF protection
+# SECRET_KEY must be set via environment variable for session/CSRF security.
+# Fallback generates a random key per-process (sessions won't persist across restarts).
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or os.urandom(32).hex()
 
 # Initialize extensions
 db.init_app(app)
