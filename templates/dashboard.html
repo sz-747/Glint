@@ -153,11 +153,7 @@
 
     const quoteText = btn.dataset.quoteText;
     const sourceLabel = btn.dataset.quoteSource;
-    let insertText = '"' + quoteText + '"';
-    if (sourceLabel) {
-      insertText += ' (' + sourceLabel + ')';
-    }
-    insertText += ' ';
+    let insertText = '"' + quoteText + '" ';
 
     if (typeof window.getSelection !== 'undefined') {
       const sel = window.getSelection();
