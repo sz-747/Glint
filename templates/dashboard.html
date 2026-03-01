@@ -1,16 +1,16 @@
-{% extends "base.html" %}
-
-{% block title %}Dashboard - Glint{% endblock %}
-{% block container_class %}container-dashboard{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Dashboard - Glint{% endblock %} {%
+block container_class %}container-dashboard{% endblock %} {% block content %}
 <div class="dashboard-shell" data-dashboard-shell>
   <aside class="panel panel-left" data-panel="left">
     <div class="panel-header">
       <h2 class="panel-title">Files</h2>
     </div>
     <div class="panel-body">
-      <form method="POST" action="{{ url_for('new_document') }}" class="new-doc-form">
+      <form
+        method="POST"
+        action="{{ url_for('new_document') }}"
+        class="new-doc-form"
+      >
         <input
           type="text"
           name="title"
@@ -23,8 +23,13 @@
       {% if documents %}
       <ul class="document-list">
         {% for doc in documents %}
-        <li class="document-item {% if selected_document and doc.id == selected_document.id %}active{% endif %}">
-          <a href="{{ url_for('dashboard', doc_id=doc.id) }}" class="document-link">
+        <li
+          class="document-item {% if selected_document and doc.id == selected_document.id %}active{% endif %}"
+        >
+          <a
+            href="{{ url_for('dashboard', doc_id=doc.id) }}"
+            class="document-link"
+          >
             <strong>{{ doc.title }}</strong>
             <span>{{ doc.word_count }} words</span>
           </a>
@@ -54,8 +59,28 @@
     >
       <input type="hidden" name="doc_id" value="{{ selected_document.id }}" />
       <div class="editor-topbar">
-        <button type="button" class="toolbar-toggle" data-target="left" aria-expanded="true" aria-label="Toggle files panel">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+        <button
+          type="button"
+          class="toolbar-toggle"
+          data-target="left"
+          aria-expanded="true"
+          aria-label="Toggle files panel"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"
+            />
+            <polyline points="13 2 13 9 20 9" />
+          </svg>
         </button>
         <input
           type="text"
@@ -71,27 +96,103 @@
             Import
           </label>
           <button type="submit" class="btn btn-save">&#128427; Save</button>
-          <button type="button" class="toolbar-toggle" data-target="right" aria-expanded="true" aria-label="Toggle quotes panel">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          <button
+            type="button"
+            class="toolbar-toggle"
+            data-target="right"
+            aria-expanded="true"
+            aria-label="Toggle quotes panel"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
           </button>
         </div>
       </div>
       <div class="format-toolbar">
         <div class="toolbar-group">
-          <button type="button" class="format-btn" data-command="bold" title="Bold"><strong>B</strong></button>
-          <button type="button" class="format-btn" data-command="italic" title="Italic"><em>I</em></button>
-          <button type="button" class="format-btn" data-command="underline" title="Underline"><u>U</u></button>
+          <button
+            type="button"
+            class="format-btn"
+            data-command="bold"
+            title="Bold"
+          >
+            <strong>B</strong>
+          </button>
+          <button
+            type="button"
+            class="format-btn"
+            data-command="italic"
+            title="Italic"
+          >
+            <em>I</em>
+          </button>
+          <button
+            type="button"
+            class="format-btn"
+            data-command="underline"
+            title="Underline"
+          >
+            <u>U</u>
+          </button>
         </div>
         <span class="toolbar-separator"></span>
         <div class="toolbar-group">
-          <button type="button" class="format-btn" data-command="formatBlock" data-value="h1" title="Heading 1">H<sub>1</sub></button>
-          <button type="button" class="format-btn" data-command="formatBlock" data-value="h2" title="Heading 2">H<sub>2</sub></button>
+          <button
+            type="button"
+            class="format-btn"
+            data-command="formatBlock"
+            data-value="h1"
+            title="Heading 1"
+          >
+            H<sub>1</sub>
+          </button>
+          <button
+            type="button"
+            class="format-btn"
+            data-command="formatBlock"
+            data-value="h2"
+            title="Heading 2"
+          >
+            H<sub>2</sub>
+          </button>
         </div>
         <span class="toolbar-separator"></span>
         <div class="toolbar-group">
-          <button type="button" class="format-btn" data-command="insertUnorderedList" title="Bullet List">&#9776;</button>
-          <button type="button" class="format-btn" data-command="insertOrderedList" title="Numbered List">&#8801;</button>
-          <button type="button" class="format-btn" data-command="formatBlock" data-value="blockquote" title="Block Quote">&#10078;</button>
+          <button
+            type="button"
+            class="format-btn"
+            data-command="insertUnorderedList"
+            title="Bullet List"
+          >
+            &#9776;
+          </button>
+          <button
+            type="button"
+            class="format-btn"
+            data-command="insertOrderedList"
+            title="Numbered List"
+          >
+            &#8801;
+          </button>
+          <button
+            type="button"
+            class="format-btn"
+            data-command="formatBlock"
+            data-value="blockquote"
+            title="Block Quote"
+          >
+            &#10078;
+          </button>
         </div>
       </div>
 
@@ -101,33 +202,80 @@
         data-doc-content
         contenteditable="true"
         placeholder="Start writing..."
-      >{{ selected_document.content | safe }}</div>
+      >
+        {{ selected_document.content | safe }}
+      </div>
 
       <div class="editor-meta">
-        <span><strong data-word-count>{{ selected_document.word_count }}</strong> words</span>
-        <span>Last updated {{ selected_document.last_modified.strftime('%b %d, %Y %I:%M %p') }}</span>
+        <span
+          ><strong data-word-count>{{ selected_document.word_count }}</strong>
+          words</span
+        >
+        <span
+          >Last updated {{ selected_document.last_modified.strftime('%b %d, %Y
+          %I:%M %p') }}</span
+        >
       </div>
     </form>
     {% else %}
     <section class="empty-editor">
       <div class="editor-topbar empty-editor-topbar">
-        <button type="button" class="toolbar-toggle" data-target="left" aria-expanded="true" aria-label="Toggle files panel">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+        <button
+          type="button"
+          class="toolbar-toggle"
+          data-target="left"
+          aria-expanded="true"
+          aria-label="Toggle files panel"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"
+            />
+            <polyline points="13 2 13 9 20 9" />
+          </svg>
         </button>
         <span></span>
-        <button type="button" class="toolbar-toggle" data-target="right" aria-expanded="true" aria-label="Toggle quotes panel">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        <button
+          type="button"
+          class="toolbar-toggle"
+          data-target="right"
+          aria-expanded="true"
+          aria-label="Toggle quotes panel"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+          </svg>
         </button>
       </div>
       <h2>No document selected</h2>
-      <p>Create a document from the left panel or upload a `.txt` file from the right panel.</p>
+      <p>
+        Create a document from the left panel or upload a `.txt` file from the
+        right panel.
+      </p>
     </section>
     {% endif %}
   </main>
 
   <aside class="panel panel-right" data-panel="right">
     <div class="panel-header">
-      <span class="panel-header-icon">&#128278;</span>
       <h2 class="panel-title">Quote Bank</h2>
     </div>
     <div class="panel-body">
@@ -155,7 +303,8 @@
       {% if quotes %}
       <ul class="quote-list" data-qb-list>
         {% for quote in quotes %}
-        <li class="quote-item"
+        <li
+          class="quote-item"
           data-search-text="{{ quote.quote_text|lower }} {{ (quote.source_label or '')|lower }} {% for tag in quote.tags %}{{ tag.name }} {% endfor %}"
           data-themes="{% for tag in quote.tags if tag.category == 'theme' %}{{ tag.name }}{% if not loop.last %},{% endif %}{% endfor %}"
           data-techniques="{% for tag in quote.tags if tag.category == 'technique' %}{{ tag.name }}{% if not loop.last %},{% endif %}{% endfor %}"
@@ -163,37 +312,49 @@
           <p class="quote-text">"{{ quote.quote_text }}"</p>
           {% if quote.source_label %}
           <p class="quote-source-label">&mdash; {{ quote.source_label }}</p>
-          {% endif %}
-          {% if quote.tags %}
+          {% endif %} {% if quote.tags %}
           <div class="quote-tags">
             {% for tag in quote.tags if tag.category == 'theme' %}
             <span class="qb-tag qb-tag-theme">{{ tag.name|capitalize }}</span>
-            {% endfor %}
-            {% for tag in quote.tags if tag.category == 'technique' %}
-            <span class="qb-tag qb-tag-technique">{{ tag.name|capitalize }}</span>
+            {% endfor %} {% for tag in quote.tags if tag.category == 'technique'
+            %}
+            <span class="qb-tag qb-tag-technique"
+              >{{ tag.name|capitalize }}</span
+            >
             {% endfor %}
           </div>
           {% endif %}
-          <button type="button" class="quote-insert-link" data-quote-text="{{ quote.quote_text | e }}" data-quote-source="{{ (quote.source_label or '') | e }}" onclick="insertQuoteAtCursor(this)">+ Insert into essay</button>
+          <button
+            type="button"
+            class="quote-insert-link"
+            data-quote-text="{{ quote.quote_text | e }}"
+            data-quote-source="{{ (quote.source_label or '') | e }}"
+            onclick="insertQuoteAtCursor(this)"
+          >
+            + Insert into essay
+          </button>
         </li>
         {% endfor %}
       </ul>
       {% else %}
-      <p class="muted">No quotes yet. <a href="{{ url_for('add_quote') }}">Add your first quote</a>.</p>
+      <p class="muted">
+        No quotes yet.
+        <a href="{{ url_for('add_quote') }}">Add your first quote</a>.
+      </p>
       {% endif %}
     </div>
   </aside>
 </div>
 <script>
-  window.insertQuoteAtCursor = function(btn) {
-    const editor = document.querySelector('.writing-area[contenteditable]');
+  window.insertQuoteAtCursor = function (btn) {
+    const editor = document.querySelector(".writing-area[contenteditable]");
     if (!editor) return;
 
     const quoteText = btn.dataset.quoteText;
     const sourceLabel = btn.dataset.quoteSource;
     let insertText = '"' + quoteText + '" ';
 
-    if (typeof window.getSelection !== 'undefined') {
+    if (typeof window.getSelection !== "undefined") {
       const sel = window.getSelection();
       if (sel.rangeCount > 0) {
         const range = sel.getRangeAt(0);
@@ -203,7 +364,7 @@
         sel.removeAllRanges();
         sel.addRange(range);
       }
-    } else if (typeof document.selection !== 'undefined') {
+    } else if (typeof document.selection !== "undefined") {
       document.selection.createRange().text = insertText;
     }
 
@@ -212,21 +373,23 @@
 </script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.toolbar-toggle').forEach(btn => {
-      btn.addEventListener('click', function() {
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".toolbar-toggle").forEach((btn) => {
+      btn.addEventListener("click", function () {
         const target = this.dataset.target;
         const panel = document.querySelector(`.panel-${target}`);
-        const isCollapsed = panel.classList.toggle('is-collapsed');
+        const isCollapsed = panel.classList.toggle("is-collapsed");
         // Update all toggles for the same target
-        document.querySelectorAll(`.toolbar-toggle[data-target="${target}"]`).forEach(b => {
-          b.setAttribute('aria-expanded', !isCollapsed);
-        });
+        document
+          .querySelectorAll(`.toolbar-toggle[data-target="${target}"]`)
+          .forEach((b) => {
+            b.setAttribute("aria-expanded", !isCollapsed);
+          });
       });
     });
 
-    document.querySelectorAll('.format-btn').forEach(btn => {
-      btn.addEventListener('click', function(e) {
+    document.querySelectorAll(".format-btn").forEach((btn) => {
+      btn.addEventListener("click", function (e) {
         e.preventDefault();
         e.stopPropagation();
         const command = this.dataset.command;
@@ -236,40 +399,41 @@
     });
 
     // Quote Bank filtering
-    const qbSearch = document.querySelector('[data-qb-search]');
-    const qbTheme = document.querySelector('[data-qb-theme-filter]');
-    const qbTech = document.querySelector('[data-qb-technique-filter]');
-    const qbItems = document.querySelectorAll('[data-qb-list] .quote-item');
+    const qbSearch = document.querySelector("[data-qb-search]");
+    const qbTheme = document.querySelector("[data-qb-theme-filter]");
+    const qbTech = document.querySelector("[data-qb-technique-filter]");
+    const qbItems = document.querySelectorAll("[data-qb-list] .quote-item");
 
     function filterQuotes() {
-      const query = (qbSearch ? qbSearch.value.trim().toLowerCase() : '');
-      const theme = (qbTheme ? qbTheme.value : '');
-      const tech = (qbTech ? qbTech.value : '');
-      qbItems.forEach(item => {
-        const text = item.dataset.searchText || '';
-        const themes = item.dataset.themes || '';
-        const techniques = item.dataset.techniques || '';
+      const query = qbSearch ? qbSearch.value.trim().toLowerCase() : "";
+      const theme = qbTheme ? qbTheme.value : "";
+      const tech = qbTech ? qbTech.value : "";
+      qbItems.forEach((item) => {
+        const text = item.dataset.searchText || "";
+        const themes = item.dataset.themes || "";
+        const techniques = item.dataset.techniques || "";
         const matchQuery = !query || text.includes(query);
-        const matchTheme = !theme || themes.split(',').includes(theme);
-        const matchTech = !tech || techniques.split(',').includes(tech);
-        item.style.display = (matchQuery && matchTheme && matchTech) ? '' : 'none';
+        const matchTheme = !theme || themes.split(",").includes(theme);
+        const matchTech = !tech || techniques.split(",").includes(tech);
+        item.style.display =
+          matchQuery && matchTheme && matchTech ? "" : "none";
       });
     }
 
-    if (qbSearch) qbSearch.addEventListener('input', filterQuotes);
-    if (qbTheme) qbTheme.addEventListener('change', filterQuotes);
-    if (qbTech) qbTech.addEventListener('change', filterQuotes);
+    if (qbSearch) qbSearch.addEventListener("input", filterQuotes);
+    if (qbTheme) qbTheme.addEventListener("change", filterQuotes);
+    if (qbTech) qbTech.addEventListener("change", filterQuotes);
 
-    const editorForm = document.querySelector('.editor-form');
+    const editorForm = document.querySelector(".editor-form");
     if (editorForm) {
-      editorForm.addEventListener('submit', function(e) {
-        const editor = document.querySelector('.writing-area[contenteditable]');
+      editorForm.addEventListener("submit", function (e) {
+        const editor = document.querySelector(".writing-area[contenteditable]");
         if (editor) {
           let hidden = this.querySelector('input[name="content"]');
           if (!hidden) {
-            hidden = document.createElement('input');
-            hidden.type = 'hidden';
-            hidden.name = 'content';
+            hidden = document.createElement("input");
+            hidden.type = "hidden";
+            hidden.name = "content";
             this.appendChild(hidden);
           }
           hidden.value = editor.innerHTML;
@@ -278,19 +442,19 @@
     }
 
     // Import button: submit file via hidden form to upload endpoint
-    const importInput = document.querySelector('[data-import-file]');
+    const importInput = document.querySelector("[data-import-file]");
     if (importInput) {
-      importInput.addEventListener('change', function() {
+      importInput.addEventListener("change", function () {
         if (!this.files.length) return;
-        const form = document.createElement('form');
-        form.method = 'POST';
+        const form = document.createElement("form");
+        form.method = "POST";
         form.action = '{{ url_for("upload_document") }}';
-        form.enctype = 'multipart/form-data';
+        form.enctype = "multipart/form-data";
         const dt = new DataTransfer();
         dt.items.add(this.files[0]);
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.name = 'file';
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.name = "file";
         fileInput.files = dt.files;
         fileInput.hidden = true;
         form.appendChild(fileInput);
