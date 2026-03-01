@@ -328,6 +328,7 @@ block container_class %}container-dashboard{% endblock %} {% block content %}
             class="quote-insert-link"
             data-quote-text="{{ quote.quote_text | e }}"
             data-quote-source="{{ (quote.source_label or '') | e }}"
+            data-analysis-chunks='{{ (quote.analysis_chunks | sort(attribute="quality_score", reverse=True))[:3] | map(attribute="chunk_text") | list | tojson }}'
             onclick="insertQuoteAtCursor(this)"
           >
             + Insert into essay
@@ -345,29 +346,159 @@ block container_class %}container-dashboard{% endblock %} {% block content %}
   </aside>
 </div>
 <script>
-  window.insertQuoteAtCursor = function (btn) {
-    const editor = document.querySelector(".writing-area[contenteditable]");
+  // Save the editor cursor position whenever the selection changes inside the
+  // writing area. Clicking a button in the right panel steals focus, so we need
+  // this stored range to restore the insertion point later.
+  var _savedEditorRange = null;
+
+  document.addEventListener("selectionchange", function () {
+    var editor = document.querySelector(".writing-area[contenteditable]");
     if (!editor) return;
+    var sel = window.getSelection();
+    if (sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+      _savedEditorRange = sel.getRangeAt(0).cloneRange();
+    }
+  });
 
-    const quoteText = btn.dataset.quoteText;
-    const sourceLabel = btn.dataset.quoteSource;
-    let insertText = '"' + quoteText + '" ';
+  function restoreEditorCursor(editor) {
+    // Restore the saved cursor position inside the editor.
+    // Returns the restored range, or null if we had to fall back to appending.
+    editor.focus();
+    if (_savedEditorRange) {
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(_savedEditorRange);
+      return _savedEditorRange;
+    }
+    return null;
+  }
 
-    if (typeof window.getSelection !== "undefined") {
-      const sel = window.getSelection();
-      if (sel.rangeCount > 0) {
-        const range = sel.getRangeAt(0);
-        range.deleteContents();
-        range.insertNode(document.createTextNode(insertText));
-        range.collapse(false);
-        sel.removeAllRanges();
-        sel.addRange(range);
-      }
-    } else if (typeof document.selection !== "undefined") {
-      document.selection.createRange().text = insertText;
+  function removeGhostSuggestion(editor) {
+    var existing = editor.querySelector(".ghost-suggestion");
+    if (existing) existing.remove();
+    if (editor._ghostDismiss) {
+      editor._ghostDismiss();
+      editor._ghostDismiss = null;
+    }
+  }
+
+  function showGhostSuggestion(editor, analysisText) {
+    var ghost = document.createElement("div");
+    ghost.className = "ghost-suggestion";
+    ghost.setAttribute("contenteditable", "false");
+
+    ghost.innerHTML =
+      '<div class="ghost-label">Suggested Analysis</div>' +
+      '<div class="ghost-text"></div>' +
+      '<div class="ghost-hint">Press Tab to accept &middot; Esc to dismiss</div>' +
+      '<div class="ghost-actions">' +
+      '  <button type="button" class="btn btn-sm btn-primary ghost-accept">Accept</button>' +
+      '  <button type="button" class="btn btn-sm btn-secondary ghost-dismiss">Dismiss</button>' +
+      '</div>';
+
+    ghost.querySelector(".ghost-text").textContent = analysisText;
+
+    // Insert ghost right after the just-inserted quote text.
+    // The cursor should already be positioned there from insertQuoteAtCursor.
+    var sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+      var range = sel.getRangeAt(0);
+      range.insertNode(ghost);
+      range.setStartAfter(ghost);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else {
+      editor.appendChild(ghost);
     }
 
-    editor.focus();
+    var ghostActive = true;
+
+    function handleGhostKey(e) {
+      if (!ghostActive) return;
+      if (e.key === "Tab") {
+        e.preventDefault();
+        acceptGhost();
+      } else if (e.key === "Escape") {
+        dismissGhost();
+      }
+    }
+
+    editor.addEventListener("keydown", handleGhostKey);
+
+    function acceptGhost() {
+      if (!ghostActive) return;
+      ghostActive = false;
+      editor.removeEventListener("keydown", handleGhostKey);
+      editor._ghostDismiss = null;
+
+      var textNode = document.createTextNode(analysisText + " ");
+      ghost.parentNode.replaceChild(textNode, ghost);
+
+      var sel = window.getSelection();
+      var range = document.createRange();
+      range.setStartAfter(textNode);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      editor.focus();
+    }
+
+    function dismissGhost() {
+      if (!ghostActive) return;
+      ghostActive = false;
+      editor.removeEventListener("keydown", handleGhostKey);
+      editor._ghostDismiss = null;
+      ghost.remove();
+      editor.focus();
+    }
+
+    ghost.querySelector(".ghost-accept").addEventListener("click", acceptGhost);
+    ghost.querySelector(".ghost-dismiss").addEventListener("click", dismissGhost);
+    editor._ghostDismiss = dismissGhost;
+  }
+
+  window.insertQuoteAtCursor = function (btn) {
+    var editor = document.querySelector(".writing-area[contenteditable]");
+    if (!editor) return;
+
+    removeGhostSuggestion(editor);
+
+    // Restore cursor position that was lost when the user clicked the panel button
+    restoreEditorCursor(editor);
+
+    var quoteText = btn.dataset.quoteText;
+    var insertText = '"' + quoteText + '" ';
+
+    var sel = window.getSelection();
+    if (sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+      var range = sel.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(document.createTextNode(insertText));
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else {
+      // Fallback: append at end of editor
+      editor.appendChild(document.createTextNode(insertText));
+      // Place cursor at end
+      sel.selectAllChildren(editor);
+      sel.collapseToEnd();
+    }
+
+    // Update saved range to this new position
+    _savedEditorRange = sel.getRangeAt(0).cloneRange();
+
+    var chunks = [];
+    try {
+      chunks = JSON.parse(btn.dataset.analysisChunks || "[]");
+    } catch (e) {
+      chunks = [];
+    }
+
+    if (chunks.length > 0) {
+      showGhostSuggestion(editor, chunks[0]);
+    }
   };
 </script>
 
@@ -435,6 +566,9 @@ block container_class %}container-dashboard{% endblock %} {% block content %}
             hidden.name = "content";
             this.appendChild(hidden);
           }
+          // Remove any ghost suggestion before saving so it is not persisted
+          const liveGhost = editor.querySelector(".ghost-suggestion");
+          if (liveGhost) liveGhost.remove();
           hidden.value = editor.innerHTML;
         }
       });
