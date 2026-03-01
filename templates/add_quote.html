@@ -30,11 +30,33 @@
       />
     </div>
 
+    <div class="form-group">
+      <label for="themes">Themes (comma-separated)</label>
+      <input
+        type="text"
+        id="themes"
+        name="themes"
+        class="form-control"
+        placeholder="e.g. Power, Ambition, Gender Roles"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="techniques">Techniques (comma-separated)</label>
+      <input
+        type="text"
+        id="techniques"
+        name="techniques"
+        class="form-control"
+        placeholder="e.g. Metaphor, Parison, Irony"
+      />
+    </div>
+
     <button type="submit" class="btn btn-primary">Add Quote</button>
   </form>
-  
+
   <p class="auth-footer">
-    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+    <a href="{{ url_for('quote_bank') }}">Back to Quote Bank</a>
   </p>
 </div>
 {% endblock %}

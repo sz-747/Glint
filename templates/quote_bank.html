@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Quote Bank - Glint{% endblock %}
+{% block container_class %}container-quote-bank{% endblock %}
+
+{% block content %}
+<div class="qb-header">
+  <div>
+    <h1 class="qb-title">Quote Bank</h1>
+    <p class="qb-count"><span data-qb-visible-count>{{ quotes|length }}</span> quotes</p>
+  </div>
+  <button type="button" class="btn btn-primary" data-open-modal>+ Add Quote</button>
+</div>
+
+<div class="qb-controls">
+  <div class="qb-search-wrap">
+    <span class="qb-search-icon">&#128269;</span>
+    <input
+      type="text"
+      class="qb-search"
+      placeholder="Search quotes, sources, themes..."
+      data-qb-search
+    />
+  </div>
+  <select class="qb-filter-select" data-qb-filter="theme">
+    <option value="">All Themes</option>
+    {% for t in themes %}
+    <option value="{{ t.name }}">{{ t.name|capitalize }}</option>
+    {% endfor %}
+  </select>
+  <select class="qb-filter-select" data-qb-filter="technique">
+    <option value="">All Techniques</option>
+    {% for t in techniques %}
+    <option value="{{ t.name }}">{{ t.name|capitalize }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<div class="qb-active-tags" data-qb-active-tags></div>
+
+<div class="qb-grid">
+  {% for quote in quotes %}
+  <div class="qb-card"
+    data-themes="{% for tag in quote.tags if tag.category == 'theme' %}{{ tag.name }}{% if not loop.last %},{% endif %}{% endfor %}"
+    data-techniques="{% for tag in quote.tags if tag.category == 'technique' %}{{ tag.name }}{% if not loop.last %},{% endif %}{% endfor %}"
+    data-search-text="{{ quote.quote_text|lower }} {{ (quote.source_label or '')|lower }} {% for tag in quote.tags %}{{ tag.name }} {% endfor %}"
+  >
+    <p class="qb-card-quote">"{{ quote.quote_text }}"</p>
+    {% if quote.source_label %}
+    <p class="qb-card-source">&mdash; {{ quote.source_label }}</p>
+    {% endif %}
+    <div class="qb-card-tags">
+      {% for tag in quote.tags if tag.category == 'theme' %}
+      <span class="qb-tag qb-tag-theme">{{ tag.name|capitalize }}</span>
+      {% endfor %}
+      {% for tag in quote.tags if tag.category == 'technique' %}
+      <span class="qb-tag qb-tag-technique">{{ tag.name|capitalize }}</span>
+      {% endfor %}
+    </div>
+    <form
+      method="POST"
+      action="{{ url_for('delete_quote', quote_id=quote.id) }}"
+      onsubmit="return confirm('Delete this quote?');"
+      class="qb-card-delete"
+    >
+      <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+
+{% if not quotes %}
+<p class="muted" style="text-align:center; margin-top:2rem;">No quotes yet. <a href="#" data-open-modal>Add your first quote</a>.</p>
+{% endif %}
+
+<!-- Add Quote Modal -->
+<div class="qb-modal-overlay" data-modal-overlay hidden>
+  <div class="qb-modal">
+    <div class="qb-modal-header">
+      <h2>Add Quote</h2>
+      <button type="button" class="qb-modal-close" data-modal-close>&times;</button>
+    </div>
+    <form method="POST" action="{{ url_for('add_quote') }}">
+      <div class="form-group">
+        <label for="modal_quote_text">QUOTE *</label>
+        <textarea
+          id="modal_quote_text"
+          name="quote_text"
+          class="form-control"
+          placeholder="Enter the quote text..."
+          rows="4"
+          required
+        ></textarea>
+      </div>
+      <div class="form-group">
+        <label for="modal_source">SOURCE *</label>
+        <input
+          type="text"
+          id="modal_source"
+          name="source_label"
+          class="form-control"
+          placeholder="Author, work, chapter..."
+          required
+        />
+      </div>
+      <div class="qb-modal-row">
+        <div class="form-group">
+          <label for="modal_themes">THEME / IDEA</label>
+          <input
+            type="text"
+            id="modal_themes"
+            name="themes"
+            class="form-control"
+            placeholder="e.g. Belonging"
+          />
+        </div>
+        <div class="form-group">
+          <label for="modal_techniques">TECHNIQUE</label>
+          <input
+            type="text"
+            id="modal_techniques"
+            name="techniques"
+            class="form-control"
+            placeholder="e.g. Metaphor"
+          />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="modal_tags">TAGS <span class="text-muted">(comma-separated)</span></label>
+        <input
+          type="text"
+          id="modal_tags"
+          name="extra_tags"
+          class="form-control"
+          placeholder="identity, power, isolation..."
+        />
+      </div>
+      <div class="qb-modal-actions">
+        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Add Quote</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.querySelector('[data-qb-search]');
+  const themeSelect = document.querySelector('[data-qb-filter="theme"]');
+  const techSelect = document.querySelector('[data-qb-filter="technique"]');
+  const cards = document.querySelectorAll('.qb-card');
+  const activeTagsEl = document.querySelector('[data-qb-active-tags]');
+  const countEl = document.querySelector('[data-qb-visible-count]');
+
+  function filterCards() {
+    const query = searchInput.value.trim().toLowerCase();
+    const theme = themeSelect.value;
+    const technique = techSelect.value;
+    let visible = 0;
+
+    cards.forEach(card => {
+      const searchText = card.dataset.searchText;
+      const cardThemes = card.dataset.themes ? card.dataset.themes.split(',') : [];
+      const cardTechniques = card.dataset.techniques ? card.dataset.techniques.split(',') : [];
+
+      let show = true;
+      if (query && !searchText.includes(query)) show = false;
+      if (theme && !cardThemes.includes(theme)) show = false;
+      if (technique && !cardTechniques.includes(technique)) show = false;
+
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    countEl.textContent = visible;
+    renderActiveTags(theme, technique);
+  }
+
+  function renderActiveTags(theme, technique) {
+    activeTagsEl.innerHTML = '';
+    if (theme) addChip(theme, 'theme');
+    if (technique) addChip(technique, 'technique');
+  }
+
+  function addChip(value, type) {
+    const chip = document.createElement('span');
+    chip.className = 'qb-chip';
+    chip.innerHTML = '&#9679; ' + value + ' <button type="button" data-dismiss>&times;</button>';
+    chip.querySelector('[data-dismiss]').addEventListener('click', function() {
+      const select = document.querySelector('[data-qb-filter="' + type + '"]');
+      select.value = '';
+      filterCards();
+    });
+    activeTagsEl.appendChild(chip);
+  }
+
+  searchInput.addEventListener('input', filterCards);
+  themeSelect.addEventListener('change', filterCards);
+  techSelect.addEventListener('change', filterCards);
+
+  // Modal logic
+  const overlay = document.querySelector('[data-modal-overlay]');
+  function openModal(e) {
+    e.preventDefault();
+    overlay.hidden = false;
+  }
+  function closeModal() {
+    overlay.hidden = true;
+  }
+  document.querySelectorAll('[data-open-modal]').forEach(btn => btn.addEventListener('click', openModal));
+  document.querySelectorAll('[data-modal-close]').forEach(btn => btn.addEventListener('click', closeModal));
+  overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && !overlay.hidden) closeModal(); });
+});
+</script>
+{% endblock %}
