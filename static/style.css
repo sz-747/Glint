@@ -309,13 +309,12 @@
 .container-dashboard {
   max-width: 100%;
   padding: 14px 18px;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
 }
 
 .dashboard-shell {
   display: flex;
-  height: 100%;
+  min-height: calc(100vh - 28px);
   position: relative;
   gap: 0;
 }
@@ -394,11 +393,11 @@
 }
 
 .panel-left {
-  overflow-y: auto;
+  overflow-y: visible;
 }
 
 .panel-right {
-  overflow-y: auto;
+  overflow-y: visible;
 }
 
 .panel-header {
@@ -516,7 +515,7 @@
 .editor-form {
   display: grid;
   grid-template-rows: auto 1fr auto;
-  height: 100%;
+  min-height: 100%;
 }
 
 .editor-header {
@@ -562,7 +561,6 @@
   font-size: 1rem;
   line-height: 1.55;
   min-height: 320px;
-  resize: vertical;
   outline: none;
 }
 
