@@ -57,14 +57,19 @@
       <span class="qb-tag qb-tag-technique">{{ tag.name|capitalize }}</span>
       {% endfor %}
     </div>
-    <form
-      method="POST"
-      action="{{ url_for('delete_quote', quote_id=quote.id) }}"
-      onsubmit="return confirm('Delete this quote?');"
-      class="qb-card-delete"
-    >
-      <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-    </form>
+    <div class="qb-card-actions">
+      <button type="button" class="qb-action-btn" title="Edit"
+        data-edit-quote
+        data-edit-url="{{ url_for('edit_quote', quote_id=quote.id) }}"
+        data-quote-text="{{ quote.quote_text | e }}"
+        data-source="{{ (quote.source_label or '') | e }}"
+        data-themes="{% for tag in quote.tags if tag.category == 'theme' %}{{ tag.name }}{% if not loop.last %}, {% endif %}{% endfor %}"
+        data-techniques="{% for tag in quote.tags if tag.category == 'technique' %}{{ tag.name }}{% if not loop.last %}, {% endif %}{% endfor %}"
+      >&#9998;</button>
+      <form method="POST" action="{{ url_for('delete_quote', quote_id=quote.id) }}" onsubmit="return confirm('Delete this quote?');" style="display:inline">
+        <button type="submit" class="qb-action-btn" title="Delete">&#128465;</button>
+      </form>
+    </div>
   </div>
   {% endfor %}
 </div>
@@ -200,8 +205,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Modal logic
   const overlay = document.querySelector('[data-modal-overlay]');
+  const modalTitle = overlay.querySelector('.qb-modal-header h2');
+  const modalForm = overlay.querySelector('form');
+  const modalSubmitBtn = overlay.querySelector('.qb-modal-actions .btn-primary');
+  const addQuoteUrl = modalForm.action;
+
   function openModal(e) {
     e.preventDefault();
+    modalTitle.textContent = 'Add Quote';
+    modalForm.action = addQuoteUrl;
+    modalSubmitBtn.textContent = 'Add Quote';
+    modalForm.reset();
     overlay.hidden = false;
   }
   function closeModal() {
@@ -211,6 +225,21 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('[data-modal-close]').forEach(btn => btn.addEventListener('click', closeModal));
   overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
   document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && !overlay.hidden) closeModal(); });
+
+  // Edit quote
+  document.querySelectorAll('[data-edit-quote]').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      modalTitle.textContent = 'Edit Quote';
+      modalForm.action = this.dataset.editUrl;
+      modalSubmitBtn.textContent = 'Save Changes';
+      document.getElementById('modal_quote_text').value = this.dataset.quoteText;
+      document.getElementById('modal_source').value = this.dataset.source;
+      document.getElementById('modal_themes').value = this.dataset.themes;
+      document.getElementById('modal_techniques').value = this.dataset.techniques;
+      overlay.hidden = false;
+    });
+  });
 });
 </script>
 {% endblock %}

@@ -592,6 +592,46 @@ def add_quote():
     return render_template('add_quote.html')
 
 
+@app.route('/quotes/edit/<int:quote_id>', methods=['POST'])
+@login_required
+def edit_quote(quote_id):
+    """Update an existing quote's text, source, and tags."""
+    quote = QuoteEntry.query.get_or_404(quote_id)
+
+    quote_text = request.form.get('quote_text', '').strip()
+    source_label = request.form.get('source_label', '').strip() or None
+    themes_raw = request.form.get('themes', '').strip()
+    techniques_raw = request.form.get('techniques', '').strip()
+
+    if not quote_text:
+        flash('Quote text is required.', 'error')
+        return redirect(url_for('quote_bank'))
+
+    normalized = normalize_text(quote_text)
+    existing = QuoteEntry.query.filter_by(quote_normalized=normalized).first()
+    if existing and existing.id != quote.id:
+        flash('Another quote with this text already exists.', 'error')
+        return redirect(url_for('quote_bank'))
+
+    quote.quote_text = quote_text
+    quote.quote_normalized = normalized
+    quote.source_label = source_label
+
+    quote.tags.clear()
+    for name in themes_raw.split(','):
+        tag = get_or_create_tag(name, 'theme')
+        if tag:
+            quote.tags.append(tag)
+    for name in techniques_raw.split(','):
+        tag = get_or_create_tag(name, 'technique')
+        if tag:
+            quote.tags.append(tag)
+
+    db.session.commit()
+    flash('Quote updated.', 'success')
+    return redirect(url_for('quote_bank'))
+
+
 @app.route('/quotes/delete/<int:quote_id>', methods=['POST'])
 @login_required
 def delete_quote(quote_id):
