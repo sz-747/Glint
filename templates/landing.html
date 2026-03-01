@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Glint - Your Writing Companion{% endblock %}
+{% block body_class %}landing-page-body{% endblock %}
+
+{% block content %}
+<div class="landing">
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">Writing Reimagined</div>
+      <h1>Your Writing Companion with <span class="highlight">Intelligent Insights</span></h1>
+      <p class="hero-sub">Glint helps you write with focus and clarity. Get intelligent suggestions as you type, manage your quote library, and bring your ideas to life.</p>
+      <div class="hero-actions">
+        <a href="{{ url_for('signup') }}" class="btn btn-lg btn-primary">Get Started Free</a>
+        <a href="{{ url_for('login') }}" class="btn btn-lg btn-outline">Sign In</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="features">
+    <h2>Everything You Need to Write Your Best</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path><path d="m15 5 4 4"></path></svg>
+        </div>
+        <h3>Distraction-Free Editor</h3>
+        <p>A clean, focused writing environment that lets you concentrate on what matters—your words.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+        </div>
+        <h3>Ghost Writer Assistant</h3>
+        <p>Intelligent suggestions appear as you type. Accept them with Tab, dismiss with Esc.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+        </div>
+        <h3>Quote Bank</h3>
+        <p>Build your personal library of quotes and sources. Organize, search, and reuse them anytime.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <h2>Ready to Transform Your Writing?</h2>
+    <p>Join thousands of writers using Glint to enhance their creativity and productivity.</p>
+    <a href="{{ url_for('signup') }}" class="btn btn-lg btn-primary">Create Free Account</a>
+  </section>
+</div>
+
+<footer class="landing-footer">
+  <p>&copy; 2025 Glint. Built for writers, by writers.</p>
+</footer>
+{% endblock %}

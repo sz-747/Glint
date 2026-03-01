@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Access Denied - Glint{% endblock %}
+
+{% block content %}
+<!-- 403 Forbidden page - shown when a non-admin user tries to access admin routes -->
+<div class="error-container">
+  <div class="error-card">
+    <h1>403</h1>
+    <h2>Access Denied</h2>
+    <p>You don't have permission to access this page.</p>
+    <p>This area is restricted to administrators only.</p>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

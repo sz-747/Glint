@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Add Quote - Glint{% endblock %}
+{% block container_class %}container-simple{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <h2>Add a Quote</h2>
+
+  <form method="POST" action="{{ url_for('add_quote') }}" class="quote-create-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <div class="form-group">
+      <label for="quote_text">Quote Text</label>
+      <textarea
+        id="quote_text"
+        name="quote_text"
+        class="form-control"
+        placeholder="Enter the quote..."
+        required
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="source_label">Source (optional)</label>
+      <input
+        type="text"
+        id="source_label"
+        name="source_label"
+        class="form-control"
+        placeholder="e.g. Author, Book Title"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="themes">Themes (comma-separated)</label>
+      <input
+        type="text"
+        id="themes"
+        name="themes"
+        class="form-control"
+        placeholder="e.g. Power, Ambition, Gender Roles"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="techniques">Techniques (comma-separated)</label>
+      <input
+        type="text"
+        id="techniques"
+        name="techniques"
+        class="form-control"
+        placeholder="e.g. Metaphor, Parison, Irony"
+      />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Quote</button>
+  </form>
+
+  <p class="auth-footer">
+    <a href="{{ url_for('quote_bank') }}">Back to Quote Bank</a>
+  </p>
+</div>
+{% endblock %}
