@@ -38,11 +38,32 @@ block container_class %}container-dashboard{% endblock %} {% block content %}
             method="POST"
             action="{{ url_for('delete_document', doc_id=doc.id) }}"
             data-confirm-name="{{ doc.title }}"
-            onsubmit="return confirm('Delete ' + this.dataset.confirmName + '?');"
+            onsubmit="
+              return confirm('Delete ' + this.dataset.confirmName + '?');
+            "
           >
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-            <button type="submit" class="btn btn-icon btn-sm" title="Delete document">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            <button
+              type="submit"
+              class="btn btn-icon btn-sm"
+              title="Delete document"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+              </svg>
               Delete
             </button>
           </form>
@@ -271,7 +292,7 @@ block container_class %}container-dashboard{% endblock %} {% block content %}
       <h2>No document selected</h2>
       <p>
         Create a document from the left panel or upload a `.txt` file from the
-        right panel.
+        header arrow icon.
       </p>
     </section>
     {% endif %}
@@ -398,7 +419,7 @@ block container_class %}container-dashboard{% endblock %} {% block content %}
       '<div class="ghost-actions">' +
       '  <button type="button" class="btn btn-sm btn-primary ghost-accept">Accept</button>' +
       '  <button type="button" class="btn btn-sm btn-secondary ghost-dismiss">Dismiss</button>' +
-      '</div>';
+      "</div>";
 
     ghost.querySelector(".ghost-text").textContent = analysisText;
 
@@ -458,7 +479,9 @@ block container_class %}container-dashboard{% endblock %} {% block content %}
     }
 
     ghost.querySelector(".ghost-accept").addEventListener("click", acceptGhost);
-    ghost.querySelector(".ghost-dismiss").addEventListener("click", dismissGhost);
+    ghost
+      .querySelector(".ghost-dismiss")
+      .addEventListener("click", dismissGhost);
     editor._ghostDismiss = dismissGhost;
   }
 
@@ -590,7 +613,7 @@ block container_class %}container-dashboard{% endblock %} {% block content %}
         const csrfInput = document.createElement("input");
         csrfInput.type = "hidden";
         csrfInput.name = "csrf_token";
-        csrfInput.value = '{{ csrf_token() }}';
+        csrfInput.value = "{{ csrf_token() }}";
         form.appendChild(csrfInput);
         const dt = new DataTransfer();
         dt.items.add(this.files[0]);
