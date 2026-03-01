@@ -413,31 +413,29 @@
   font-weight: 700;
 }
 
-.panel-toggle {
-  border: 1px solid var(--border);
-  background: #fff;
-  color: var(--text-main);
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
+.toolbar-toggle {
+  background: none;
+  border: none;
+  color: var(--text-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
-  z-index: 10;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
 }
 
-.panel-toggle-left {
-  position: absolute;
-  right: -12px;
-  top: 12px;
+.toolbar-toggle:hover {
+  color: var(--text-main);
+  background: var(--bg-hover, rgba(0,0,0,0.05));
 }
 
-.panel-toggle-right {
-  position: absolute;
-  left: -12px;
-  top: 12px;
+.empty-editor-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
 }
 
 .panel-body {

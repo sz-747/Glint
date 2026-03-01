@@ -45,24 +45,6 @@
   </aside>
 
   <main class="panel panel-center">
-    <button
-      type="button"
-      class="panel-toggle panel-toggle-left"
-      data-target="left"
-      aria-expanded="true"
-      aria-label="Toggle files panel"
-    >
-      <span class="toggle-icon">&#9654;</span>
-    </button>
-    <button
-      type="button"
-      class="panel-toggle panel-toggle-right"
-      data-target="right"
-      aria-expanded="true"
-      aria-label="Toggle quotes panel"
-    >
-      <span class="toggle-icon">&#128278;</span>
-    </button>
     {% if selected_document %}
     <form
       method="POST"
@@ -72,6 +54,9 @@
     >
       <input type="hidden" name="doc_id" value="{{ selected_document.id }}" />
       <div class="editor-topbar">
+        <button type="button" class="toolbar-toggle" data-target="left" aria-expanded="true" aria-label="Toggle files panel">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+        </button>
         <input
           type="text"
           name="title"
@@ -86,6 +71,9 @@
             Import
           </label>
           <button type="submit" class="btn btn-save">&#128427; Save</button>
+          <button type="button" class="toolbar-toggle" data-target="right" aria-expanded="true" aria-label="Toggle quotes panel">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          </button>
         </div>
       </div>
       <div class="format-toolbar">
@@ -122,6 +110,15 @@
     </form>
     {% else %}
     <section class="empty-editor">
+      <div class="editor-topbar empty-editor-topbar">
+        <button type="button" class="toolbar-toggle" data-target="left" aria-expanded="true" aria-label="Toggle files panel">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+        </button>
+        <span></span>
+        <button type="button" class="toolbar-toggle" data-target="right" aria-expanded="true" aria-label="Toggle quotes panel">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        </button>
+      </div>
       <h2>No document selected</h2>
       <p>Create a document from the left panel or upload a `.txt` file from the right panel.</p>
     </section>
@@ -216,19 +213,15 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.panel-toggle').forEach(btn => {
+    document.querySelectorAll('.toolbar-toggle').forEach(btn => {
       btn.addEventListener('click', function() {
         const target = this.dataset.target;
         const panel = document.querySelector(`.panel-${target}`);
         const isCollapsed = panel.classList.toggle('is-collapsed');
-        this.setAttribute('aria-expanded', !isCollapsed);
-        
-        const icon = this.querySelector('.toggle-icon');
-        if (target === 'left') {
-          icon.innerHTML = isCollapsed ? '&#9664;' : '&#9654;';
-        } else {
-          icon.innerHTML = '&#128278;';
-        }
+        // Update all toggles for the same target
+        document.querySelectorAll(`.toolbar-toggle[data-target="${target}"]`).forEach(b => {
+          b.setAttribute('aria-expanded', !isCollapsed);
+        });
       });
     });
 
