@@ -27,6 +27,7 @@
       id="signup-form"
       novalidate
     >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <!-- ===== STEP 1: Account details ===== -->
       <div class="form-step active" id="step-1">
         <h2>Create Account</h2>

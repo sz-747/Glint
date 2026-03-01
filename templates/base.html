@@ -33,6 +33,7 @@
         <a href="{{ url_for('admin') }}">Admin Panel</a>
         {% else %}
         <form method="POST" action="{{ url_for('upload_document') }}" enctype="multipart/form-data" class="nav-upload-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
           <input id="nav-file" type="file" name="file" accept=".txt" style="display:none" />
           <button type="button" class="nav-upload-btn" onclick="document.getElementById('nav-file').click()" title="Upload Document">↑</button>
         </form>

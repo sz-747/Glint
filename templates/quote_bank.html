@@ -76,6 +76,7 @@ block container_class %}container-quote-bank{% endblock %} {% block content %}
         onsubmit="return confirm('Delete this quote?');"
         style="display: inline"
       >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <button type="submit" class="qb-action-btn" title="Delete">
           &#128465;
         </button>
@@ -101,6 +102,7 @@ block container_class %}container-quote-bank{% endblock %} {% block content %}
       </button>
     </div>
     <form method="POST" action="{{ url_for('add_quote') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <div class="form-group">
         <label for="modal_quote_text">QUOTE *</label>
         <textarea

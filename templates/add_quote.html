@@ -8,6 +8,7 @@
   <h2>Add a Quote</h2>
 
   <form method="POST" action="{{ url_for('add_quote') }}" class="quote-create-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     <div class="form-group">
       <label for="quote_text">Quote Text</label>
       <textarea

@@ -26,6 +26,7 @@ from functools import wraps
 
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_wtf.csrf import CSRFProtect, CSRFError
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
@@ -53,8 +54,17 @@ app.config['SECRET_KEY'] = 'your-secret-key-here'  # Required for sessions and C
 
 # Initialize extensions
 db.init_app(app)
+csrf = CSRFProtect(app)  # Enable CSRF protection on all POST forms
 login_manager = LoginManager(app)  # Initialize Flask-Login
 login_manager.login_view = 'login'
+
+
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    """Return a clear error when a CSRF token is missing or invalid."""
+    flash('Session expired or invalid request. Please try again.', 'error')
+    return redirect(request.referrer or url_for('home'))
+
 
 # User loader callback for Flask-Login
 # This tells Flask-Login how to reload the user object from the user ID stored in the session
@@ -488,6 +498,7 @@ def normalize_text(text):
     return " ".join(str(text).lower().split())
 
 @app.route('/admin/quotes/add', methods=['POST'])
+@csrf.exempt  # JSON API — no form token; protected by @login_required + @admin_required
 @login_required
 @admin_required
 def admin_add_quote():

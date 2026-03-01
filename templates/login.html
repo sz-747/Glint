@@ -17,6 +17,7 @@
         even if URL structure changes
         -->
         <form method="POST" action="{{ url_for('login') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <!-- Username input field -->
             <div class="form-group">
                 <label for="username">Username</label>
