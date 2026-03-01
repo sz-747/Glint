@@ -37,7 +37,8 @@ block container_class %}container-dashboard{% endblock %} {% block content %}
           <form
             method="POST"
             action="{{ url_for('delete_document', doc_id=doc.id) }}"
-            onsubmit="return confirm('Delete {{ doc.title }}?');"
+            data-confirm-name="{{ doc.title }}"
+            onsubmit="return confirm('Delete ' + this.dataset.confirmName + '?');"
           >
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <button type="submit" class="btn btn-icon btn-sm" title="Delete document">

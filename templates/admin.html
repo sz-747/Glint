@@ -122,7 +122,8 @@ block content %}
                 method="POST"
                 action="{{ url_for('delete_user', user_id=user.id) }}"
                 style="display: inline"
-                onsubmit="return confirm('Delete user {{ user.username }}? This will also delete all their documents and data.');"
+                data-confirm-name="{{ user.username }}"
+                onsubmit="return confirm('Delete user ' + this.dataset.confirmName + '? This will also delete all their documents and data.');"
               >
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                 <button type="submit" class="btn btn-icon btn-sm" title="Delete user">
@@ -169,7 +170,8 @@ block content %}
                 method="POST"
                 action="{{ url_for('admin_delete_document', doc_id=doc.id) }}"
                 style="display: inline"
-                onsubmit="return confirm('Delete document \"{{ doc.title }}\"?');"
+                data-confirm-name="{{ doc.title }}"
+                onsubmit="return confirm('Delete document \"' + this.dataset.confirmName + '\"?');"
               >
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                 <button type="submit" class="btn btn-icon btn-sm" title="Delete document">
