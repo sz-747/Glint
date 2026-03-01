@@ -232,6 +232,8 @@ def dashboard():
 
     # Fetch all quotes with their analysis chunks for the quote bank panel
     quotes = QuoteEntry.query.order_by(QuoteEntry.created_at.desc()).all()
+    themes = Tag.query.filter_by(category='theme').order_by(Tag.name).all()
+    techniques = Tag.query.filter_by(category='technique').order_by(Tag.name).all()
 
     return render_template(
         'dashboard.html',
@@ -239,7 +241,9 @@ def dashboard():
         selected_document=selected_document,
         total_quotes=total_quotes,
         total_chunks=total_chunks,
-        quotes=quotes
+        quotes=quotes,
+        themes=themes,
+        techniques=techniques
     )
 
 

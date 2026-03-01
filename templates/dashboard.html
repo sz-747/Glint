@@ -61,7 +61,7 @@
       aria-expanded="true"
       aria-label="Toggle quotes panel"
     >
-      <span class="toggle-icon">&#9664;</span>
+      <span class="toggle-icon">&#128278;</span>
     </button>
     {% if selected_document %}
     <form
@@ -130,42 +130,60 @@
 
   <aside class="panel panel-right" data-panel="right">
     <div class="panel-header">
-      <h2 class="panel-title">Ghost Writer</h2>
+      <span class="panel-header-icon">&#128278;</span>
+      <h2 class="panel-title">Quote Bank</h2>
     </div>
     <div class="panel-body">
-      <div class="ghost-search-section">
+      <div class="qb-sidebar-filters">
         <input
           type="text"
           class="ghost-search-input"
-          placeholder="Search quotes by keyword..."
-          data-ghost-search
+          placeholder=""
+          data-qb-search
         />
-        <div class="ghost-results" data-ghost-results></div>
+        <select class="qb-sidebar-select" data-qb-theme-filter>
+          <option value="">All themes</option>
+          {% for tag in themes %}
+          <option value="{{ tag.name }}">{{ tag.name|capitalize }}</option>
+          {% endfor %}
+        </select>
+        <select class="qb-sidebar-select" data-qb-technique-filter>
+          <option value="">All techniques</option>
+          {% for tag in techniques %}
+          <option value="{{ tag.name }}">{{ tag.name|capitalize }}</option>
+          {% endfor %}
+        </select>
       </div>
 
-      <hr class="panel-divider" />
-
-      <h3 class="panel-subtitle">Quote Bank</h3>
       {% if quotes %}
-      <ul class="quote-list">
+      <ul class="quote-list" data-qb-list>
         {% for quote in quotes %}
-        <li class="quote-item">
+        <li class="quote-item"
+          data-search-text="{{ quote.quote_text|lower }} {{ (quote.source_label or '')|lower }} {% for tag in quote.tags %}{{ tag.name }} {% endfor %}"
+          data-themes="{% for tag in quote.tags if tag.category == 'theme' %}{{ tag.name }}{% if not loop.last %},{% endif %}{% endfor %}"
+          data-techniques="{% for tag in quote.tags if tag.category == 'technique' %}{{ tag.name }}{% if not loop.last %},{% endif %}{% endfor %}"
+        >
           <p class="quote-text">"{{ quote.quote_text }}"</p>
           {% if quote.source_label %}
           <p class="quote-source-label">&mdash; {{ quote.source_label }}</p>
           {% endif %}
-          <div class="quote-actions">
-            <button type="button" class="btn btn-primary btn-sm" data-quote-text="{{ quote.quote_text | e }}" data-quote-source="{{ (quote.source_label or '') | e }}" onclick="insertQuoteAtCursor(this)">Insert</button>
+          {% if quote.tags %}
+          <div class="quote-tags">
+            {% for tag in quote.tags if tag.category == 'theme' %}
+            <span class="qb-tag qb-tag-theme">{{ tag.name|capitalize }}</span>
+            {% endfor %}
+            {% for tag in quote.tags if tag.category == 'technique' %}
+            <span class="qb-tag qb-tag-technique">{{ tag.name|capitalize }}</span>
+            {% endfor %}
           </div>
+          {% endif %}
+          <button type="button" class="quote-insert-link" data-quote-text="{{ quote.quote_text | e }}" data-quote-source="{{ (quote.source_label or '') | e }}" onclick="insertQuoteAtCursor(this)">+ Insert into essay</button>
         </li>
         {% endfor %}
       </ul>
       {% else %}
       <p class="muted">No quotes yet. <a href="{{ url_for('add_quote') }}">Add your first quote</a>.</p>
       {% endif %}
-
-      <hr class="panel-divider" />
-
     </div>
   </aside>
 </div>
@@ -209,7 +227,7 @@
         if (target === 'left') {
           icon.innerHTML = isCollapsed ? '&#9664;' : '&#9654;';
         } else {
-          icon.innerHTML = isCollapsed ? '&#9654;' : '&#9664;';
+          icon.innerHTML = '&#128278;';
         }
       });
     });
@@ -224,68 +242,30 @@
       });
     });
 
-    // Ghost Writer search
-    const ghostInput = document.querySelector('[data-ghost-search]');
-    const ghostResults = document.querySelector('[data-ghost-results]');
-    if (ghostInput && ghostResults) {
-      let ghostTimer = null;
-      ghostInput.addEventListener('input', function() {
-        clearTimeout(ghostTimer);
-        const q = this.value.trim();
-        if (!q) { ghostResults.innerHTML = ''; return; }
-        ghostTimer = setTimeout(() => {
-          fetch('/api/quotes/search?q=' + encodeURIComponent(q))
-            .then(r => r.json())
-            .then(data => {
-              if (!data.length) {
-                ghostResults.innerHTML = '<p class="muted">No matching quotes found.</p>';
-                return;
-              }
-              ghostResults.innerHTML = '';
-              data.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'ghost-suggestion';
+    // Quote Bank filtering
+    const qbSearch = document.querySelector('[data-qb-search]');
+    const qbTheme = document.querySelector('[data-qb-theme-filter]');
+    const qbTech = document.querySelector('[data-qb-technique-filter]');
+    const qbItems = document.querySelectorAll('[data-qb-list] .quote-item');
 
-                const quoteP = document.createElement('p');
-                quoteP.className = 'ghost-quote-text';
-                quoteP.textContent = '\u201C' + item.quote_text + '\u201D';
-                div.appendChild(quoteP);
-
-                if (item.source_label) {
-                  const srcP = document.createElement('p');
-                  srcP.className = 'ghost-source';
-                  srcP.innerHTML = '&mdash; ';
-                  srcP.appendChild(document.createTextNode(item.source_label));
-                  div.appendChild(srcP);
-                }
-
-                if (item.chunks && item.chunks.length) {
-                  const chunksDiv = document.createElement('div');
-                  chunksDiv.className = 'ghost-chunks';
-                  item.chunks.forEach(c => {
-                    const cp = document.createElement('p');
-                    cp.className = 'ghost-chunk';
-                    cp.textContent = c.chunk_text;
-                    chunksDiv.appendChild(cp);
-                  });
-                  div.appendChild(chunksDiv);
-                }
-
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'btn btn-primary btn-sm';
-                btn.textContent = 'Insert';
-                btn.dataset.quoteText = item.quote_text;
-                btn.dataset.quoteSource = item.source_label || '';
-                btn.addEventListener('click', function() { insertQuoteAtCursor(this); });
-                div.appendChild(btn);
-
-                ghostResults.appendChild(div);
-              });
-            });
-        }, 300);
+    function filterQuotes() {
+      const query = (qbSearch ? qbSearch.value.trim().toLowerCase() : '');
+      const theme = (qbTheme ? qbTheme.value : '');
+      const tech = (qbTech ? qbTech.value : '');
+      qbItems.forEach(item => {
+        const text = item.dataset.searchText || '';
+        const themes = item.dataset.themes || '';
+        const techniques = item.dataset.techniques || '';
+        const matchQuery = !query || text.includes(query);
+        const matchTheme = !theme || themes.split(',').includes(theme);
+        const matchTech = !tech || techniques.split(',').includes(tech);
+        item.style.display = (matchQuery && matchTheme && matchTech) ? '' : 'none';
       });
     }
+
+    if (qbSearch) qbSearch.addEventListener('input', filterQuotes);
+    if (qbTheme) qbTheme.addEventListener('change', filterQuotes);
+    if (qbTech) qbTech.addEventListener('change', filterQuotes);
 
     const editorForm = document.querySelector('.editor-form');
     if (editorForm) {
