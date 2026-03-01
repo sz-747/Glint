@@ -2,8 +2,17 @@
 
 ## App Description
 
-Glint is a writing tool designed to be totally distraction-free, but its main feature is this "Ghost Writer" engine.
+Glint is a tool for optimising the current writing workflow. The aim is to reduce friction between changing different tabs and breaking the flow state. 
+Users are able to create files and insert quotes and basic formatting.
+Admins are able to view all files, create/delete new users, see when the docs are created.
+Analysis is pre-set in the database for each quote. There will be a suggestive analysis for each quote when the user inserts in a quote.
 
-The idea is that instead of using generic AI like ChatGPT, which can sound AI slop(ish), Glint learns from you. You upload your past essays or notes, and the app uses a local algorithm to analyze your specific tone and writing style. Then, while you're typing, it offers autocomplete suggestions that actually sound like something you would write.
+## Local Setup
 
-Technically, it’s a full-stack app using Python (Flask) and Vanilla JavaScript. I’m building the intelligence engine from scratch using local databases rather than external APIs, so it’s completely private and fast.
+install dependencies with: py -m pip install -r requirements.txt
+
+Load starter quote-analysis rows into SQLite once: .\venv\Scripts\python.exe scripts\backfill_quotes.py
+
+Notes:
+- App startup now creates tables but does not auto-seed quote data.
+- If there are no admins then use the flask create-admin command to create the first 

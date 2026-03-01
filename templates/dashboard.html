@@ -1,0 +1,609 @@
+{% extends "base.html" %} {% block title %}Dashboard - Glint{% endblock %} {%
+block container_class %}container-dashboard{% endblock %} {% block content %}
+<div class="dashboard-shell" data-dashboard-shell>
+  <aside class="panel panel-left" data-panel="left">
+    <div class="panel-header">
+      <h2 class="panel-title">Files</h2>
+    </div>
+    <div class="panel-body">
+      <form
+        method="POST"
+        action="{{ url_for('new_document') }}"
+        class="new-doc-form"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input
+          type="text"
+          name="title"
+          placeholder="New document title"
+          maxlength="200"
+        />
+        <button type="submit" class="btn btn-primary">Create</button>
+      </form>
+
+      {% if documents %}
+      <ul class="document-list">
+        {% for doc in documents %}
+        <li
+          class="document-item {% if selected_document and doc.id == selected_document.id %}active{% endif %}"
+        >
+          <a
+            href="{{ url_for('dashboard', doc_id=doc.id) }}"
+            class="document-link"
+          >
+            <strong>{{ doc.title }}</strong>
+            <span>{{ doc.word_count }} words</span>
+          </a>
+          <form
+            method="POST"
+            action="{{ url_for('delete_document', doc_id=doc.id) }}"
+            data-confirm-name="{{ doc.title }}"
+            onsubmit="return confirm('Delete ' + this.dataset.confirmName + '?');"
+          >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button type="submit" class="btn btn-icon btn-sm" title="Delete document">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+              Delete
+            </button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="muted">No documents yet. Create one to start writing.</p>
+      {% endif %}
+    </div>
+  </aside>
+
+  <main class="panel panel-center">
+    {% if selected_document %}
+    <form
+      method="POST"
+      action="{{ url_for('update_document', doc_id=selected_document.id) }}"
+      class="editor-form"
+      data-doc-id="{{ selected_document.id }}"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <input type="hidden" name="doc_id" value="{{ selected_document.id }}" />
+      <div class="editor-topbar">
+        <button
+          type="button"
+          class="toolbar-toggle"
+          data-target="left"
+          aria-expanded="true"
+          aria-label="Toggle files panel"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"
+            />
+            <polyline points="13 2 13 9 20 9" />
+          </svg>
+        </button>
+        <input
+          type="text"
+          name="title"
+          value="{{ selected_document.title }}"
+          class="editor-title"
+          maxlength="200"
+          required
+        />
+        <div class="editor-topbar-actions">
+          <label class="btn btn-import" tabindex="0">
+            <input type="file" accept=".txt" data-import-file hidden />
+            Import
+          </label>
+          <button type="submit" class="btn btn-save">&#128427; Save</button>
+          <button
+            type="button"
+            class="toolbar-toggle"
+            data-target="right"
+            aria-expanded="true"
+            aria-label="Toggle quotes panel"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="format-toolbar">
+        <div class="toolbar-group">
+          <button
+            type="button"
+            class="format-btn"
+            data-command="bold"
+            title="Bold"
+          >
+            <strong>B</strong>
+          </button>
+          <button
+            type="button"
+            class="format-btn"
+            data-command="italic"
+            title="Italic"
+          >
+            <em>I</em>
+          </button>
+          <button
+            type="button"
+            class="format-btn"
+            data-command="underline"
+            title="Underline"
+          >
+            <u>U</u>
+          </button>
+        </div>
+        <span class="toolbar-separator"></span>
+        <div class="toolbar-group">
+          <button
+            type="button"
+            class="format-btn"
+            data-command="formatBlock"
+            data-value="h1"
+            title="Heading 1"
+          >
+            H<sub>1</sub>
+          </button>
+          <button
+            type="button"
+            class="format-btn"
+            data-command="formatBlock"
+            data-value="h2"
+            title="Heading 2"
+          >
+            H<sub>2</sub>
+          </button>
+        </div>
+        <span class="toolbar-separator"></span>
+        <div class="toolbar-group">
+          <button
+            type="button"
+            class="format-btn"
+            data-command="insertUnorderedList"
+            title="Bullet List"
+          >
+            &#9776;
+          </button>
+          <button
+            type="button"
+            class="format-btn"
+            data-command="insertOrderedList"
+            title="Numbered List"
+          >
+            &#8801;
+          </button>
+          <button
+            type="button"
+            class="format-btn"
+            data-command="formatBlock"
+            data-value="blockquote"
+            title="Block Quote"
+          >
+            &#10078;
+          </button>
+        </div>
+      </div>
+
+      <div
+        name="content"
+        class="writing-area"
+        data-doc-content
+        contenteditable="true"
+        placeholder="Start writing..."
+      >
+        {{ selected_document.content | safe }}
+      </div>
+
+      <div class="editor-meta">
+        <span
+          ><strong data-word-count>{{ selected_document.word_count }}</strong>
+          words</span
+        >
+      </div>
+    </form>
+    {% else %}
+    <section class="empty-editor">
+      <div class="editor-topbar empty-editor-topbar">
+        <button
+          type="button"
+          class="toolbar-toggle"
+          data-target="left"
+          aria-expanded="true"
+          aria-label="Toggle files panel"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"
+            />
+            <polyline points="13 2 13 9 20 9" />
+          </svg>
+        </button>
+        <span></span>
+        <button
+          type="button"
+          class="toolbar-toggle"
+          data-target="right"
+          aria-expanded="true"
+          aria-label="Toggle quotes panel"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+          </svg>
+        </button>
+      </div>
+      <h2>No document selected</h2>
+      <p>
+        Create a document from the left panel or upload a `.txt` file from the
+        right panel.
+      </p>
+    </section>
+    {% endif %}
+  </main>
+
+  <aside class="panel panel-right" data-panel="right">
+    <div class="panel-header">
+      <h2 class="panel-title">Quote Bank</h2>
+    </div>
+    <div class="panel-body">
+      <div class="qb-sidebar-filters">
+        <input
+          type="text"
+          class="ghost-search-input"
+          placeholder=""
+          data-qb-search
+        />
+        <select class="qb-sidebar-select" data-qb-theme-filter>
+          <option value="">All themes</option>
+          {% for tag in themes %}
+          <option value="{{ tag.name }}">{{ tag.name|capitalize }}</option>
+          {% endfor %}
+        </select>
+        <select class="qb-sidebar-select" data-qb-technique-filter>
+          <option value="">All techniques</option>
+          {% for tag in techniques %}
+          <option value="{{ tag.name }}">{{ tag.name|capitalize }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      {% if quotes %}
+      <ul class="quote-list" data-qb-list>
+        {% for quote in quotes %}
+        <li
+          class="quote-item"
+          data-search-text="{{ quote.quote_text|lower }} {{ (quote.source_label or '')|lower }} {% for tag in quote.tags %}{{ tag.name }} {% endfor %}"
+          data-themes="{% for tag in quote.tags if tag.category == 'theme' %}{{ tag.name }}{% if not loop.last %},{% endif %}{% endfor %}"
+          data-techniques="{% for tag in quote.tags if tag.category == 'technique' %}{{ tag.name }}{% if not loop.last %},{% endif %}{% endfor %}"
+        >
+          <p class="quote-text">"{{ quote.quote_text }}"</p>
+          {% if quote.source_label %}
+          <p class="quote-source-label">&mdash; {{ quote.source_label }}</p>
+          {% endif %} {% if quote.tags %}
+          <div class="quote-tags">
+            {% for tag in quote.tags if tag.category == 'theme' %}
+            <span class="qb-tag qb-tag-theme">{{ tag.name|capitalize }}</span>
+            {% endfor %} {% for tag in quote.tags if tag.category == 'technique'
+            %}
+            <span class="qb-tag qb-tag-technique"
+              >{{ tag.name|capitalize }}</span
+            >
+            {% endfor %}
+          </div>
+          {% endif %}
+          <button
+            type="button"
+            class="quote-insert-link"
+            data-quote-text="{{ quote.quote_text | e }}"
+            data-quote-source="{{ (quote.source_label or '') | e }}"
+            data-analysis-chunks='{{ (quote.analysis_chunks | sort(attribute="quality_score", reverse=True))[:3] | map(attribute="chunk_text") | list | tojson }}'
+            onclick="insertQuoteAtCursor(this)"
+          >
+            + Insert into essay
+          </button>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="muted">
+        No quotes yet.
+        <a href="{{ url_for('add_quote') }}">Add your first quote</a>.
+      </p>
+      {% endif %}
+    </div>
+  </aside>
+</div>
+<script>
+  // Save the editor cursor position whenever the selection changes inside the
+  // writing area. Clicking a button in the right panel steals focus, so we need
+  // this stored range to restore the insertion point later.
+  var _savedEditorRange = null;
+
+  document.addEventListener("selectionchange", function () {
+    var editor = document.querySelector(".writing-area[contenteditable]");
+    if (!editor) return;
+    var sel = window.getSelection();
+    if (sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+      _savedEditorRange = sel.getRangeAt(0).cloneRange();
+    }
+  });
+
+  function restoreEditorCursor(editor) {
+    // Restore the saved cursor position inside the editor.
+    // Returns the restored range, or null if we had to fall back to appending.
+    editor.focus();
+    if (_savedEditorRange) {
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(_savedEditorRange);
+      return _savedEditorRange;
+    }
+    return null;
+  }
+
+  function removeGhostSuggestion(editor) {
+    var existing = editor.querySelector(".ghost-suggestion");
+    if (existing) existing.remove();
+    if (editor._ghostDismiss) {
+      editor._ghostDismiss();
+      editor._ghostDismiss = null;
+    }
+  }
+
+  function showGhostSuggestion(editor, analysisText) {
+    var ghost = document.createElement("div");
+    ghost.className = "ghost-suggestion";
+    ghost.setAttribute("contenteditable", "false");
+
+    ghost.innerHTML =
+      '<div class="ghost-label">Suggested Analysis</div>' +
+      '<div class="ghost-text"></div>' +
+      '<div class="ghost-hint">Press Tab to accept &middot; Esc to dismiss</div>' +
+      '<div class="ghost-actions">' +
+      '  <button type="button" class="btn btn-sm btn-primary ghost-accept">Accept</button>' +
+      '  <button type="button" class="btn btn-sm btn-secondary ghost-dismiss">Dismiss</button>' +
+      '</div>';
+
+    ghost.querySelector(".ghost-text").textContent = analysisText;
+
+    // Insert ghost right after the just-inserted quote text.
+    // The cursor should already be positioned there from insertQuoteAtCursor.
+    var sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+      var range = sel.getRangeAt(0);
+      range.insertNode(ghost);
+      range.setStartAfter(ghost);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else {
+      editor.appendChild(ghost);
+    }
+
+    var ghostActive = true;
+
+    function handleGhostKey(e) {
+      if (!ghostActive) return;
+      if (e.key === "Tab") {
+        e.preventDefault();
+        acceptGhost();
+      } else if (e.key === "Escape") {
+        dismissGhost();
+      }
+    }
+
+    editor.addEventListener("keydown", handleGhostKey);
+
+    function acceptGhost() {
+      if (!ghostActive) return;
+      ghostActive = false;
+      editor.removeEventListener("keydown", handleGhostKey);
+      editor._ghostDismiss = null;
+
+      var textNode = document.createTextNode(analysisText + " ");
+      ghost.parentNode.replaceChild(textNode, ghost);
+
+      var sel = window.getSelection();
+      var range = document.createRange();
+      range.setStartAfter(textNode);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      editor.focus();
+    }
+
+    function dismissGhost() {
+      if (!ghostActive) return;
+      ghostActive = false;
+      editor.removeEventListener("keydown", handleGhostKey);
+      editor._ghostDismiss = null;
+      ghost.remove();
+      editor.focus();
+    }
+
+    ghost.querySelector(".ghost-accept").addEventListener("click", acceptGhost);
+    ghost.querySelector(".ghost-dismiss").addEventListener("click", dismissGhost);
+    editor._ghostDismiss = dismissGhost;
+  }
+
+  window.insertQuoteAtCursor = function (btn) {
+    var editor = document.querySelector(".writing-area[contenteditable]");
+    if (!editor) return;
+
+    removeGhostSuggestion(editor);
+
+    // Restore cursor position that was lost when the user clicked the panel button
+    restoreEditorCursor(editor);
+
+    var quoteText = btn.dataset.quoteText;
+    var insertText = '"' + quoteText + '" ';
+
+    var sel = window.getSelection();
+    if (sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+      var range = sel.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(document.createTextNode(insertText));
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else {
+      // Fallback: append at end of editor
+      editor.appendChild(document.createTextNode(insertText));
+      // Place cursor at end
+      sel.selectAllChildren(editor);
+      sel.collapseToEnd();
+    }
+
+    // Update saved range to this new position
+    _savedEditorRange = sel.getRangeAt(0).cloneRange();
+
+    var chunks = [];
+    try {
+      chunks = JSON.parse(btn.dataset.analysisChunks || "[]");
+    } catch (e) {
+      chunks = [];
+    }
+
+    if (chunks.length > 0) {
+      showGhostSuggestion(editor, chunks[0]);
+    }
+  };
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".toolbar-toggle").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const target = this.dataset.target;
+        const panel = document.querySelector(`.panel-${target}`);
+        const isCollapsed = panel.classList.toggle("is-collapsed");
+        // Update all toggles for the same target
+        document
+          .querySelectorAll(`.toolbar-toggle[data-target="${target}"]`)
+          .forEach((b) => {
+            b.setAttribute("aria-expanded", !isCollapsed);
+          });
+      });
+    });
+
+    document.querySelectorAll(".format-btn").forEach((btn) => {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const command = this.dataset.command;
+        const value = this.dataset.value || null;
+        document.execCommand(command, false, value);
+      });
+    });
+
+    // Quote Bank filtering
+    const qbSearch = document.querySelector("[data-qb-search]");
+    const qbTheme = document.querySelector("[data-qb-theme-filter]");
+    const qbTech = document.querySelector("[data-qb-technique-filter]");
+    const qbItems = document.querySelectorAll("[data-qb-list] .quote-item");
+
+    function filterQuotes() {
+      const query = qbSearch ? qbSearch.value.trim().toLowerCase() : "";
+      const theme = qbTheme ? qbTheme.value : "";
+      const tech = qbTech ? qbTech.value : "";
+      qbItems.forEach((item) => {
+        const text = item.dataset.searchText || "";
+        const themes = item.dataset.themes || "";
+        const techniques = item.dataset.techniques || "";
+        const matchQuery = !query || text.includes(query);
+        const matchTheme = !theme || themes.split(",").includes(theme);
+        const matchTech = !tech || techniques.split(",").includes(tech);
+        item.style.display =
+          matchQuery && matchTheme && matchTech ? "" : "none";
+      });
+    }
+
+    if (qbSearch) qbSearch.addEventListener("input", filterQuotes);
+    if (qbTheme) qbTheme.addEventListener("change", filterQuotes);
+    if (qbTech) qbTech.addEventListener("change", filterQuotes);
+
+    const editorForm = document.querySelector(".editor-form");
+    if (editorForm) {
+      editorForm.addEventListener("submit", function (e) {
+        const editor = document.querySelector(".writing-area[contenteditable]");
+        if (editor) {
+          let hidden = this.querySelector('input[name="content"]');
+          if (!hidden) {
+            hidden = document.createElement("input");
+            hidden.type = "hidden";
+            hidden.name = "content";
+            this.appendChild(hidden);
+          }
+          // Remove any ghost suggestion before saving so it is not persisted
+          const liveGhost = editor.querySelector(".ghost-suggestion");
+          if (liveGhost) liveGhost.remove();
+          hidden.value = editor.innerHTML;
+        }
+      });
+    }
+
+    // Import button: submit file via hidden form to upload endpoint
+    const importInput = document.querySelector("[data-import-file]");
+    if (importInput) {
+      importInput.addEventListener("change", function () {
+        if (!this.files.length) return;
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = '{{ url_for("upload_document") }}';
+        form.enctype = "multipart/form-data";
+        const csrfInput = document.createElement("input");
+        csrfInput.type = "hidden";
+        csrfInput.name = "csrf_token";
+        csrfInput.value = '{{ csrf_token() }}';
+        form.appendChild(csrfInput);
+        const dt = new DataTransfer();
+        dt.items.add(this.files[0]);
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.name = "file";
+        fileInput.files = dt.files;
+        fileInput.hidden = true;
+        form.appendChild(fileInput);
+        document.body.appendChild(form);
+        form.submit();
+      });
+    }
+  });
+</script>
+{% endblock %}

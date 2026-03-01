@@ -1,0 +1,205 @@
+{% extends "base.html" %} {% block title %}Admin Panel - Glint{% endblock %} {%
+block content %}
+<!-- Admin Dashboard - restricted to users with role='admin' via @admin_required decorator -->
+<div class="admin-container">
+  <!-- Page header -->
+  <div class="admin-header">
+    <h2>Administrator Dashboard</h2>
+    <p class="subtitle">System Overview &amp; User Management</p>
+  </div>
+
+  <!-- System Statistics Cards -->
+  <!-- Aggregated counts queried in the admin() route and passed via stats dict -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-info">
+        <h3>{{ stats.total_users }}</h3>
+        <p>Total Users</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-info">
+        <h3>{{ stats.total_documents }}</h3>
+        <p>Total Documents</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-info">
+        <h3>{{ stats.total_quotes }}</h3>
+        <p>Total Quotes</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-info">
+        <h3>{{ "{:,}".format(stats.total_words) }}</h3>
+        <p>Total Words Written</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- User Management Table -->
+  <!-- Lists all registered users with role badges, document counts, and delete actions -->
+  <div class="admin-card">
+    <h3>User Management</h3>
+    
+    <!-- Search Form & Create User Button -->
+    <div class="search-form">
+      <form method="GET" action="{{ url_for('admin') }}" class="search-form-inner">
+        <input
+          type="text"
+          name="q"
+          placeholder="Search users..."
+          value="{{ search_query }}"
+          class="search-input"
+        >
+        <button type="submit" class="btn btn-sm">Search</button>
+        {% if search_query %}
+        <a href="{{ url_for('admin') }}" class="btn btn-sm btn-secondary">Clear</a>
+        {% endif %}
+      </form>
+      <div class="create-user-wrapper">
+        <button type="button" class="btn btn-sm" id="create-user-toggle">+ Create User</button>
+        <div class="create-user-popover" id="create-user-popover">
+          <form method="POST" action="{{ url_for('create_user') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="role" value="user">
+            <input
+              type="text"
+              name="username"
+              placeholder="Username"
+              required
+              class="form-input"
+            >
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              required
+              minlength="6"
+              class="form-input"
+            >
+            <button type="submit" class="btn btn-sm" style="width:100%">Create User</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    {% if search_query %}
+    <p class="search-results-info">Showing results for: <strong>{{ search_query }}</strong></p>
+    {% endif %}
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+
+            <th>Documents</th>
+            <th>Quotes</th>
+
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users if user.role != 'admin' %}
+          <tr>
+            <td>
+              <strong>{{ user.username }}</strong>
+              {% if user.id == current_user.id %}
+              <!-- Badge to identify the currently logged-in admin -->
+              <span class="badge badge-you">You</span>
+              {% endif %}
+            </td>
+            <td>{{ user.documents|length }}</td>
+            <td>{{ user.quote_entries|length }}</td>
+            <td>
+              {% if user.id != current_user.id %}
+              <!-- Delete form uses POST to prevent CSRF via GET; includes JS confirmation -->
+              <form
+                method="POST"
+                action="{{ url_for('delete_user', user_id=user.id) }}"
+                style="display: inline"
+                data-confirm-name="{{ user.username }}"
+                onsubmit="return confirm('Delete user ' + this.dataset.confirmName + '? This will also delete all their documents and data.');"
+              >
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <button type="submit" class="btn btn-icon btn-sm" title="Delete user">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                  Delete
+                </button>
+              </form>
+              {% else %}
+              <!-- Admins cannot delete themselves to prevent lockout -->
+              <span class="muted">--</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Document Overview -->
+  <div class="admin-card">
+    <h3>Document Overview</h3>
+    <p class="muted">Showing 50 most recent documents</p>
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Words</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for doc in documents %}
+          <tr>
+            <td><strong>{{ doc.title }}</strong></td>
+            <td>{{ doc.author.username }}</td>
+            <td>{{ doc.word_count }}</td>
+            <td>{{ doc.created_at.strftime('%Y-%m-%d') }}</td>
+            <td>
+              <form
+                method="POST"
+                action="{{ url_for('admin_delete_document', doc_id=doc.id) }}"
+                style="display: inline"
+                data-confirm-name="{{ doc.title }}"
+                onsubmit="return confirm('Delete document \"' + this.dataset.confirmName + '\"?');"
+              >
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <button type="submit" class="btn btn-icon btn-sm" title="Delete document">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" class="muted">No documents found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+  const toggle = document.getElementById('create-user-toggle');
+  const popover = document.getElementById('create-user-popover');
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    popover.classList.toggle('active');
+  });
+  document.addEventListener('click', (e) => {
+    if (!popover.contains(e.target)) popover.classList.remove('active');
+  });
+</script>
+{% endblock %}

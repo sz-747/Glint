@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>{% block title %}Glint{% endblock %}</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  </head>
+  <body class="{% block body_class %}{% endblock %}">
+    <nav class="navbar">
+      <div class="nav-brand">
+        <h1><a href="{{ url_for('home') }}">Glint</a></h1>
+      </div>
+
+      <!-- Hamburger button: visible only on mobile (< 768px) -->
+      <button class="hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <div class="nav-links" id="nav-links">
+        {% if current_user.is_authenticated %}
+        {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('admin') }}">Admin Panel</a>
+        {% else %}
+        <form method="POST" action="{{ url_for('upload_document') }}" enctype="multipart/form-data" class="nav-upload-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <input id="nav-file" type="file" name="file" accept=".txt" style="display:none" />
+          <button type="button" class="nav-upload-btn" onclick="document.getElementById('nav-file').click()" title="Upload Document">↑</button>
+        </form>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('quote_bank') }}">Quote Bank</a>
+        {% endif %}
+        <form method="POST" action="{{ url_for('logout') }}" class="nav-logout-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <button type="submit" class="nav-logout-btn">Logout ({{ current_user.username }})</button>
+        </form>
+        {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('signup') }}">Sign Up</a>
+        {% endif %}
+      </div>
+    </nav>
+
+    <div class="container {% block container_class %}{% endblock %}">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      {% for category, message in messages %}
+      <div class="alert alert-{{ category }}" data-auto-dismiss="true">{{ message }}</div>
+      {% endfor %} {% endif %} {% endwith %}
+      {% block content %}{% endblock %}
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+      document.getElementById('nav-file').addEventListener('change', function() {
+        if (this.files.length) this.closest('form').submit();
+      });
+    </script>
+  </body>
+</html>
