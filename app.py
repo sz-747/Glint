@@ -29,8 +29,20 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
+import bleach
+
 from models import db, User, Document, QuoteEntry, AnalysisChunk, Tag, quote_tags
 from quote_engine import search_quotes
+
+# Allowed HTML tags for the contenteditable editor — everything else is stripped
+ALLOWED_TAGS = ['b', 'i', 'u', 'strong', 'em', 'h1', 'h2', 'h3', 'p', 'br',
+                'ul', 'ol', 'li', 'blockquote', 'div', 'span', 'sub', 'sup']
+ALLOWED_ATTRS = {}  # No attributes allowed — strips event handlers, style, etc.
+
+
+def sanitize_html(html):
+    """Strip all tags/attributes except safe formatting ones."""
+    return bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
 
 app = Flask(__name__)
 
@@ -271,7 +283,7 @@ def update_document(doc_id):
     content = request.form.get('content')
     if content is None or content == '':
         content = document.content
-    content = content or ''
+    content = sanitize_html(content or '')
     plain_text = re.sub(r'<[^>]+>', ' ', content)
     word_count = len(plain_text.split())
 
@@ -322,6 +334,7 @@ def upload_document():
         flash('Uploaded file is empty.', 'error')
         return redirect(url_for('dashboard'))
 
+    content = sanitize_html(content)
     title = Path(filename).stem or 'Uploaded Document'
     document = Document(
         user_id=current_user.id,
