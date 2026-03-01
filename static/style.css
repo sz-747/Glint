@@ -684,6 +684,7 @@
   display: flex;
   gap: 0.5rem;
   margin-top: 0.5rem;
+  justify-content: space-between;
 }
 
 .quote-text {
