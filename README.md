@@ -2,18 +2,10 @@
 
 ## App Description
 
-Glint is a writing tool with a distraction-free editor and a local "Ghost Writer" helper.
-
-Phase 2 now uses a **quote-to-analysis retrieval engine** (pivot from n-gram generation).  
-When a user types a known quote (exact, in-progress prefix, or fuzzy typo match), the app retrieves a mapped analysis sentence from SQLite and shows it as ghost text in the dashboard editor.
-
-Current Ghost Writer behavior:
-- Live suggestion API: `POST /api/suggest-analysis`
-- In-editor ghost suggestion rendering with debounce
-- `Tab` to accept suggestion, `Esc` to dismiss
-- Suggestion interaction logging via `POST /api/log-suggestion`
-
-This keeps suggestions deterministic, fast, and private without external AI APIs.
+Glint is a tool for optimising the current writing workflow. The aim is to reduce friction between changing different tabs and breaking the flow state. 
+Users are able to create files and insert quotes and basic formatting.
+Admins are able to view all files, create/delete new users, see when the docs are created.
+Analysis is pre-set in the database for each quote. There will be a suggestive analysis for each quote when the user inserts in a quote.
 
 ## Local Setup
 
@@ -39,9 +31,6 @@ Load starter quote-analysis rows into SQLite once:
 
 Then run the app:
 
-```powershell
-python app.py
-```
 
 ```powershell
 py app.py
