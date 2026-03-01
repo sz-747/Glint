@@ -625,6 +625,11 @@ def edit_quote(quote_id):
     """Update an existing quote's text, source, and tags."""
     quote = QuoteEntry.query.get_or_404(quote_id)
 
+    # Ownership check: only the quote owner or an admin can edit
+    if quote.user_id != current_user.id and current_user.role != 'admin':
+        flash('You can only edit your own quotes.', 'error')
+        return redirect(url_for('quote_bank'))
+
     quote_text = request.form.get('quote_text', '').strip()
     source_label = request.form.get('source_label', '').strip() or None
     themes_raw = request.form.get('themes', '').strip()
@@ -662,10 +667,13 @@ def edit_quote(quote_id):
 @app.route('/quotes/delete/<int:quote_id>', methods=['POST'])
 @login_required
 def delete_quote(quote_id):
-    """
-    Allow users to delete any quote (including seeded quotes).
-    """
+    """Delete a quote if the current user owns it or is an admin."""
     quote = QuoteEntry.query.get_or_404(quote_id)
+
+    # Ownership check: only the quote owner or an admin can delete
+    if quote.user_id != current_user.id and current_user.role != 'admin':
+        flash('You can only delete your own quotes.', 'error')
+        return redirect(url_for('quote_bank'))
 
     db.session.delete(quote)
     db.session.commit()
