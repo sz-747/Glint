@@ -37,6 +37,21 @@ class Document(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+quote_tags = db.Table('quote_tags',
+    db.Column('quote_id', db.Integer, db.ForeignKey('quote_entry.id'), primary_key=True),
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True)
+)
+
+
+class Tag(db.Model):
+    """A theme or technique tag that can be applied to quotes."""
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    category = db.Column(db.String(20), nullable=False)  # 'theme' or 'technique'
+
+    __table_args__ = (db.UniqueConstraint('name', 'category', name='uq_tag_name_category'),)
+
+
 class QuoteEntry(db.Model):
     """
     Stores a canonical quote with its normalized form for fast lookup.
@@ -49,8 +64,9 @@ class QuoteEntry(db.Model):
     source_label = db.Column(db.String(200), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Relationship to analysis chunks
+    # Relationships
     analysis_chunks = db.relationship('AnalysisChunk', backref='quote_entry', lazy=True, cascade='all, delete-orphan')
+    tags = db.relationship('Tag', secondary=quote_tags, backref=db.backref('quotes', lazy=True))
 
 
 class AnalysisChunk(db.Model):

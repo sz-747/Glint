@@ -29,7 +29,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
-from models import db, User, Document, QuoteEntry, AnalysisChunk
+from models import db, User, Document, QuoteEntry, AnalysisChunk, Tag, quote_tags
 from quote_engine import search_quotes
 
 app = Flask(__name__)
@@ -533,6 +533,18 @@ def admin_add_quote():
 # User Quote Management (CRUD)
 # ============================================
 
+def get_or_create_tag(name, category):
+    """Get an existing tag or create a new one. Name is stored lowercase-stripped."""
+    name = name.strip().lower()
+    if not name:
+        return None
+    tag = Tag.query.filter_by(name=name, category=category).first()
+    if not tag:
+        tag = Tag(name=name, category=category)
+        db.session.add(tag)
+    return tag
+
+
 @app.route('/quotes/new', methods=['GET', 'POST'])
 @login_required
 def add_quote():
@@ -540,6 +552,8 @@ def add_quote():
     if request.method == 'POST':
         quote_text = request.form.get('quote_text', '').strip()
         source_label = request.form.get('source_label', '').strip() or None
+        themes_raw = request.form.get('themes', '').strip()
+        techniques_raw = request.form.get('techniques', '').strip()
 
         if not quote_text:
             flash('Quote text is required.', 'error')
@@ -559,10 +573,21 @@ def add_quote():
             source_label=source_label
         )
         db.session.add(quote)
+
+        for name in themes_raw.split(','):
+            tag = get_or_create_tag(name, 'theme')
+            if tag:
+                quote.tags.append(tag)
+
+        for name in techniques_raw.split(','):
+            tag = get_or_create_tag(name, 'technique')
+            if tag:
+                quote.tags.append(tag)
+
         db.session.commit()
 
         flash('Quote added successfully.', 'success')
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('quote_bank'))
 
     return render_template('add_quote.html')
 
@@ -578,7 +603,17 @@ def delete_quote(quote_id):
     db.session.delete(quote)
     db.session.commit()
     flash('Quote deleted.', 'success')
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('quote_bank'))
+
+
+@app.route('/quotes')
+@login_required
+def quote_bank():
+    """Dedicated Quote Bank page with filtering by themes and techniques."""
+    quotes = QuoteEntry.query.order_by(QuoteEntry.created_at.desc()).all()
+    themes = Tag.query.filter_by(category='theme').order_by(Tag.name).all()
+    techniques = Tag.query.filter_by(category='technique').order_by(Tag.name).all()
+    return render_template('quote_bank.html', quotes=quotes, themes=themes, techniques=techniques)
 
 
 # ============================================
