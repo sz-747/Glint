@@ -113,9 +113,22 @@
 
   <aside class="panel panel-right" data-panel="right">
     <div class="panel-header">
-      <h2 class="panel-title">Quotes</h2>
+      <h2 class="panel-title">Ghost Writer</h2>
     </div>
     <div class="panel-body">
+      <div class="ghost-search-section">
+        <input
+          type="text"
+          class="ghost-search-input"
+          placeholder="Search quotes by keyword..."
+          data-ghost-search
+        />
+        <div class="ghost-results" data-ghost-results></div>
+      </div>
+
+      <hr class="panel-divider" />
+
+      <h3 class="panel-subtitle">Quote Bank</h3>
       {% if quotes %}
       <ul class="quote-list">
         {% for quote in quotes %}
@@ -200,6 +213,42 @@
         document.execCommand(command, false, value);
       });
     });
+
+    // Ghost Writer search
+    const ghostInput = document.querySelector('[data-ghost-search]');
+    const ghostResults = document.querySelector('[data-ghost-results]');
+    if (ghostInput && ghostResults) {
+      let ghostTimer = null;
+      ghostInput.addEventListener('input', function() {
+        clearTimeout(ghostTimer);
+        const q = this.value.trim();
+        if (!q) { ghostResults.innerHTML = ''; return; }
+        ghostTimer = setTimeout(() => {
+          fetch('/api/quotes/search?q=' + encodeURIComponent(q))
+            .then(r => r.json())
+            .then(data => {
+              if (!data.length) {
+                ghostResults.innerHTML = '<p class="muted">No matching quotes found.</p>';
+                return;
+              }
+              ghostResults.innerHTML = data.map(item => {
+                const chunks = (item.chunks || []).map(c =>
+                  '<p class="ghost-chunk">' + c.chunk_text + '</p>'
+                ).join('');
+                return '<div class="ghost-suggestion">' +
+                  '<p class="ghost-quote-text">"' + item.quote_text + '"</p>' +
+                  (item.source_label ? '<p class="ghost-source">&mdash; ' + item.source_label + '</p>' : '') +
+                  (chunks ? '<div class="ghost-chunks">' + chunks + '</div>' : '') +
+                  '<button type="button" class="btn btn-primary btn-sm" data-quote-text="' +
+                    item.quote_text.replace(/"/g, '&quot;') + '" data-quote-source="' +
+                    (item.source_label || '').replace(/"/g, '&quot;') +
+                    '" onclick="insertQuoteAtCursor(this)">Insert</button>' +
+                  '</div>';
+              }).join('');
+            });
+        }, 300);
+      });
+    }
 
     const editorForm = document.querySelector('.editor-form');
     if (editorForm) {
