@@ -9,33 +9,10 @@ Analysis is pre-set in the database for each quote. There will be a suggestive a
 
 ## Local Setup
 
-Use the project virtual environment so all Flask dependencies are available.
+install dependencies with: py -m pip install -r requirements.txt
 
-```powershell
-# from repo root
-.\venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-```
-
-If you prefer `py`, install dependencies with:
-
-```powershell
-py -m pip install -r requirements.txt
-```
-
-Load starter quote-analysis rows into SQLite once:
-
-```powershell
-.\venv\Scripts\python.exe scripts\backfill_quotes.py
-```
-
-Then run the app:
-
-
-```powershell
-py app.py
-```
+Load starter quote-analysis rows into SQLite once: .\venv\Scripts\python.exe scripts\backfill_quotes.py
 
 Notes:
 - App startup now creates tables but does not auto-seed quote data.
-- If `quote_entry` is empty, suggestion APIs return no analysis until quotes are backfilled or added via admin endpoints.
+- If there are no admins then use the flask create-admin command to create the first 
