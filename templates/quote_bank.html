@@ -1,20 +1,19 @@
-{% extends "base.html" %}
-
-{% block title %}Quote Bank - Glint{% endblock %}
-{% block container_class %}container-quote-bank{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Quote Bank - Glint{% endblock %} {%
+block container_class %}container-quote-bank{% endblock %} {% block content %}
 <div class="qb-header">
   <div>
     <h1 class="qb-title">Quote Bank</h1>
-    <p class="qb-count"><span data-qb-visible-count>{{ quotes|length }}</span> quotes</p>
+    <p class="qb-count">
+      <span data-qb-visible-count>{{ quotes|length }}</span> quotes
+    </p>
   </div>
-  <button type="button" class="btn btn-primary" data-open-modal>+ Add Quote</button>
+  <button type="button" class="btn btn-primary" data-open-modal>
+    + Add Quote
+  </button>
 </div>
 
 <div class="qb-controls">
   <div class="qb-search-wrap">
-    <span class="qb-search-icon">&#128269;</span>
     <input
       type="text"
       class="qb-search"
@@ -40,7 +39,8 @@
 
 <div class="qb-grid">
   {% for quote in quotes %}
-  <div class="qb-card"
+  <div
+    class="qb-card"
     data-themes="{% for tag in quote.tags if tag.category == 'theme' %}{{ tag.name }}{% if not loop.last %},{% endif %}{% endfor %}"
     data-techniques="{% for tag in quote.tags if tag.category == 'technique' %}{{ tag.name }}{% if not loop.last %},{% endif %}{% endfor %}"
     data-search-text="{{ quote.quote_text|lower }} {{ (quote.source_label or '')|lower }} {% for tag in quote.tags %}{{ tag.name }} {% endfor %}"
@@ -52,22 +52,33 @@
     <div class="qb-card-tags">
       {% for tag in quote.tags if tag.category == 'theme' %}
       <span class="qb-tag qb-tag-theme">{{ tag.name|capitalize }}</span>
-      {% endfor %}
-      {% for tag in quote.tags if tag.category == 'technique' %}
+      {% endfor %} {% for tag in quote.tags if tag.category == 'technique' %}
       <span class="qb-tag qb-tag-technique">{{ tag.name|capitalize }}</span>
       {% endfor %}
     </div>
     <div class="qb-card-actions">
-      <button type="button" class="qb-action-btn" title="Edit"
+      <button
+        type="button"
+        class="qb-action-btn"
+        title="Edit"
         data-edit-quote
         data-edit-url="{{ url_for('edit_quote', quote_id=quote.id) }}"
         data-quote-text="{{ quote.quote_text | e }}"
         data-source="{{ (quote.source_label or '') | e }}"
         data-themes="{% for tag in quote.tags if tag.category == 'theme' %}{{ tag.name }}{% if not loop.last %}, {% endif %}{% endfor %}"
         data-techniques="{% for tag in quote.tags if tag.category == 'technique' %}{{ tag.name }}{% if not loop.last %}, {% endif %}{% endfor %}"
-      >&#9998;</button>
-      <form method="POST" action="{{ url_for('delete_quote', quote_id=quote.id) }}" onsubmit="return confirm('Delete this quote?');" style="display:inline">
-        <button type="submit" class="qb-action-btn" title="Delete">&#128465;</button>
+      >
+        &#9998;
+      </button>
+      <form
+        method="POST"
+        action="{{ url_for('delete_quote', quote_id=quote.id) }}"
+        onsubmit="return confirm('Delete this quote?');"
+        style="display: inline"
+      >
+        <button type="submit" class="qb-action-btn" title="Delete">
+          &#128465;
+        </button>
       </form>
     </div>
   </div>
@@ -75,7 +86,9 @@
 </div>
 
 {% if not quotes %}
-<p class="muted" style="text-align:center; margin-top:2rem;">No quotes yet. <a href="#" data-open-modal>Add your first quote</a>.</p>
+<p class="muted" style="text-align: center; margin-top: 2rem">
+  No quotes yet. <a href="#" data-open-modal>Add your first quote</a>.
+</p>
 {% endif %}
 
 <!-- Add Quote Modal -->
@@ -83,7 +96,9 @@
   <div class="qb-modal">
     <div class="qb-modal-header">
       <h2>Add Quote</h2>
-      <button type="button" class="qb-modal-close" data-modal-close>&times;</button>
+      <button type="button" class="qb-modal-close" data-modal-close>
+        &times;
+      </button>
     </div>
     <form method="POST" action="{{ url_for('add_quote') }}">
       <div class="form-group">
@@ -131,7 +146,9 @@
         </div>
       </div>
       <div class="form-group">
-        <label for="modal_tags">TAGS <span class="text-muted">(comma-separated)</span></label>
+        <label for="modal_tags"
+          >TAGS <span class="text-muted">(comma-separated)</span></label
+        >
         <input
           type="text"
           id="modal_tags"
@@ -141,7 +158,9 @@
         />
       </div>
       <div class="qb-modal-actions">
-        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+        <button type="button" class="btn btn-secondary" data-modal-close>
+          Cancel
+        </button>
         <button type="submit" class="btn btn-primary">Add Quote</button>
       </div>
     </form>
@@ -149,97 +168,120 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const searchInput = document.querySelector('[data-qb-search]');
-  const themeSelect = document.querySelector('[data-qb-filter="theme"]');
-  const techSelect = document.querySelector('[data-qb-filter="technique"]');
-  const cards = document.querySelectorAll('.qb-card');
-  const activeTagsEl = document.querySelector('[data-qb-active-tags]');
-  const countEl = document.querySelector('[data-qb-visible-count]');
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.querySelector("[data-qb-search]");
+    const themeSelect = document.querySelector('[data-qb-filter="theme"]');
+    const techSelect = document.querySelector('[data-qb-filter="technique"]');
+    const cards = document.querySelectorAll(".qb-card");
+    const activeTagsEl = document.querySelector("[data-qb-active-tags]");
+    const countEl = document.querySelector("[data-qb-visible-count]");
 
-  function filterCards() {
-    const query = searchInput.value.trim().toLowerCase();
-    const theme = themeSelect.value;
-    const technique = techSelect.value;
-    let visible = 0;
+    function filterCards() {
+      const query = searchInput.value.trim().toLowerCase();
+      const theme = themeSelect.value;
+      const technique = techSelect.value;
+      let visible = 0;
 
-    cards.forEach(card => {
-      const searchText = card.dataset.searchText;
-      const cardThemes = card.dataset.themes ? card.dataset.themes.split(',') : [];
-      const cardTechniques = card.dataset.techniques ? card.dataset.techniques.split(',') : [];
+      cards.forEach((card) => {
+        const searchText = card.dataset.searchText;
+        const cardThemes = card.dataset.themes
+          ? card.dataset.themes.split(",")
+          : [];
+        const cardTechniques = card.dataset.techniques
+          ? card.dataset.techniques.split(",")
+          : [];
 
-      let show = true;
-      if (query && !searchText.includes(query)) show = false;
-      if (theme && !cardThemes.includes(theme)) show = false;
-      if (technique && !cardTechniques.includes(technique)) show = false;
+        let show = true;
+        if (query && !searchText.includes(query)) show = false;
+        if (theme && !cardThemes.includes(theme)) show = false;
+        if (technique && !cardTechniques.includes(technique)) show = false;
 
-      card.style.display = show ? '' : 'none';
-      if (show) visible++;
-    });
+        card.style.display = show ? "" : "none";
+        if (show) visible++;
+      });
 
-    countEl.textContent = visible;
-    renderActiveTags(theme, technique);
-  }
+      countEl.textContent = visible;
+      renderActiveTags(theme, technique);
+    }
 
-  function renderActiveTags(theme, technique) {
-    activeTagsEl.innerHTML = '';
-    if (theme) addChip(theme, 'theme');
-    if (technique) addChip(technique, 'technique');
-  }
+    function renderActiveTags(theme, technique) {
+      activeTagsEl.innerHTML = "";
+      if (theme) addChip(theme, "theme");
+      if (technique) addChip(technique, "technique");
+    }
 
-  function addChip(value, type) {
-    const chip = document.createElement('span');
-    chip.className = 'qb-chip';
-    chip.innerHTML = '&#9679; ' + value + ' <button type="button" data-dismiss>&times;</button>';
-    chip.querySelector('[data-dismiss]').addEventListener('click', function() {
-      const select = document.querySelector('[data-qb-filter="' + type + '"]');
-      select.value = '';
-      filterCards();
-    });
-    activeTagsEl.appendChild(chip);
-  }
+    function addChip(value, type) {
+      const chip = document.createElement("span");
+      chip.className = "qb-chip";
+      chip.innerHTML =
+        "&#9679; " +
+        value +
+        ' <button type="button" data-dismiss>&times;</button>';
+      chip
+        .querySelector("[data-dismiss]")
+        .addEventListener("click", function () {
+          const select = document.querySelector(
+            '[data-qb-filter="' + type + '"]',
+          );
+          select.value = "";
+          filterCards();
+        });
+      activeTagsEl.appendChild(chip);
+    }
 
-  searchInput.addEventListener('input', filterCards);
-  themeSelect.addEventListener('change', filterCards);
-  techSelect.addEventListener('change', filterCards);
+    searchInput.addEventListener("input", filterCards);
+    themeSelect.addEventListener("change", filterCards);
+    techSelect.addEventListener("change", filterCards);
 
-  // Modal logic
-  const overlay = document.querySelector('[data-modal-overlay]');
-  const modalTitle = overlay.querySelector('.qb-modal-header h2');
-  const modalForm = overlay.querySelector('form');
-  const modalSubmitBtn = overlay.querySelector('.qb-modal-actions .btn-primary');
-  const addQuoteUrl = modalForm.action;
+    // Modal logic
+    const overlay = document.querySelector("[data-modal-overlay]");
+    const modalTitle = overlay.querySelector(".qb-modal-header h2");
+    const modalForm = overlay.querySelector("form");
+    const modalSubmitBtn = overlay.querySelector(
+      ".qb-modal-actions .btn-primary",
+    );
+    const addQuoteUrl = modalForm.action;
 
-  function openModal(e) {
-    e.preventDefault();
-    modalTitle.textContent = 'Add Quote';
-    modalForm.action = addQuoteUrl;
-    modalSubmitBtn.textContent = 'Add Quote';
-    modalForm.reset();
-    overlay.hidden = false;
-  }
-  function closeModal() {
-    overlay.hidden = true;
-  }
-  document.querySelectorAll('[data-open-modal]').forEach(btn => btn.addEventListener('click', openModal));
-  document.querySelectorAll('[data-modal-close]').forEach(btn => btn.addEventListener('click', closeModal));
-  overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
-  document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && !overlay.hidden) closeModal(); });
-
-  // Edit quote
-  document.querySelectorAll('[data-edit-quote]').forEach(btn => {
-    btn.addEventListener('click', function(e) {
+    function openModal(e) {
       e.preventDefault();
-      modalTitle.textContent = 'Edit Quote';
-      modalForm.action = this.dataset.editUrl;
-      modalSubmitBtn.textContent = 'Save Changes';
-      document.getElementById('modal_quote_text').value = this.dataset.quoteText;
-      document.getElementById('modal_source').value = this.dataset.source;
-      document.getElementById('modal_themes').value = this.dataset.themes;
-      document.getElementById('modal_techniques').value = this.dataset.techniques;
+      modalTitle.textContent = "Add Quote";
+      modalForm.action = addQuoteUrl;
+      modalSubmitBtn.textContent = "Add Quote";
+      modalForm.reset();
       overlay.hidden = false;
+    }
+    function closeModal() {
+      overlay.hidden = true;
+    }
+    document
+      .querySelectorAll("[data-open-modal]")
+      .forEach((btn) => btn.addEventListener("click", openModal));
+    document
+      .querySelectorAll("[data-modal-close]")
+      .forEach((btn) => btn.addEventListener("click", closeModal));
+    overlay.addEventListener("click", function (e) {
+      if (e.target === overlay) closeModal();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !overlay.hidden) closeModal();
+    });
+
+    // Edit quote
+    document.querySelectorAll("[data-edit-quote]").forEach((btn) => {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        modalTitle.textContent = "Edit Quote";
+        modalForm.action = this.dataset.editUrl;
+        modalSubmitBtn.textContent = "Save Changes";
+        document.getElementById("modal_quote_text").value =
+          this.dataset.quoteText;
+        document.getElementById("modal_source").value = this.dataset.source;
+        document.getElementById("modal_themes").value = this.dataset.themes;
+        document.getElementById("modal_techniques").value =
+          this.dataset.techniques;
+        overlay.hidden = false;
+      });
     });
   });
-});
 </script>
 {% endblock %}
