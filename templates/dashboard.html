@@ -138,7 +138,7 @@
           <p class="quote-source-label">&mdash; {{ quote.source_label }}</p>
           {% endif %}
           <div class="quote-actions">
-            <button type="button" class="btn btn-primary btn-sm" data-quote-text="{{ quote.quote_text }}" data-quote-source="{{ quote.source_label or '' }}" onclick="insertQuoteAtCursor(this)">Insert</button>
+            <button type="button" class="btn btn-primary btn-sm" data-quote-text="{{ quote.quote_text | e }}" data-quote-source="{{ (quote.source_label or '') | e }}" onclick="insertQuoteAtCursor(this)">Insert</button>
             <form
               method="POST"
               action="{{ url_for('delete_quote', quote_id=quote.id) }}"
@@ -231,20 +231,47 @@
                 ghostResults.innerHTML = '<p class="muted">No matching quotes found.</p>';
                 return;
               }
-              ghostResults.innerHTML = data.map(item => {
-                const chunks = (item.chunks || []).map(c =>
-                  '<p class="ghost-chunk">' + c.chunk_text + '</p>'
-                ).join('');
-                return '<div class="ghost-suggestion">' +
-                  '<p class="ghost-quote-text">"' + item.quote_text + '"</p>' +
-                  (item.source_label ? '<p class="ghost-source">&mdash; ' + item.source_label + '</p>' : '') +
-                  (chunks ? '<div class="ghost-chunks">' + chunks + '</div>' : '') +
-                  '<button type="button" class="btn btn-primary btn-sm" data-quote-text="' +
-                    item.quote_text.replace(/"/g, '&quot;') + '" data-quote-source="' +
-                    (item.source_label || '').replace(/"/g, '&quot;') +
-                    '" onclick="insertQuoteAtCursor(this)">Insert</button>' +
-                  '</div>';
-              }).join('');
+              ghostResults.innerHTML = '';
+              data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'ghost-suggestion';
+
+                const quoteP = document.createElement('p');
+                quoteP.className = 'ghost-quote-text';
+                quoteP.textContent = '\u201C' + item.quote_text + '\u201D';
+                div.appendChild(quoteP);
+
+                if (item.source_label) {
+                  const srcP = document.createElement('p');
+                  srcP.className = 'ghost-source';
+                  srcP.innerHTML = '&mdash; ';
+                  srcP.appendChild(document.createTextNode(item.source_label));
+                  div.appendChild(srcP);
+                }
+
+                if (item.chunks && item.chunks.length) {
+                  const chunksDiv = document.createElement('div');
+                  chunksDiv.className = 'ghost-chunks';
+                  item.chunks.forEach(c => {
+                    const cp = document.createElement('p');
+                    cp.className = 'ghost-chunk';
+                    cp.textContent = c.chunk_text;
+                    chunksDiv.appendChild(cp);
+                  });
+                  div.appendChild(chunksDiv);
+                }
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-primary btn-sm';
+                btn.textContent = 'Insert';
+                btn.dataset.quoteText = item.quote_text;
+                btn.dataset.quoteSource = item.source_label || '';
+                btn.addEventListener('click', function() { insertQuoteAtCursor(this); });
+                div.appendChild(btn);
+
+                ghostResults.appendChild(div);
+              });
             });
         }, 300);
       });
