@@ -514,8 +514,7 @@
 
 .editor-form {
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  min-height: 100%;
+  grid-template-rows: auto auto auto;
 }
 
 .editor-header {
@@ -560,7 +559,7 @@
   padding: 1rem;
   font-size: 1rem;
   line-height: 1.55;
-  min-height: 320px;
+  min-height: 200px;
   outline: none;
 }
 
@@ -1068,7 +1067,7 @@
 
   .writing-area {
     font-size: 1rem;
-    min-height: 400px;
+    min-height: 200px;
   }
 
   /* Dashboard document items */
