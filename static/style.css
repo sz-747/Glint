@@ -700,8 +700,9 @@
   margin: 0;
 }
 
-.quote-item .btn-danger {
-  margin-top: 0.5rem;
+.quote-actions .btn,
+.quote-actions form {
+  margin: 0;
 }
 
 .panel-divider {
