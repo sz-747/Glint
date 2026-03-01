@@ -687,5 +687,61 @@ def api_search_quotes():
 with app.app_context():
     db.create_all()
 
+
+# ============================================
+# CLI Commands
+# ============================================
+
+@app.cli.command('create-admin')
+def create_admin():
+    """Create the first admin account from the terminal.
+
+    Usage: flask create-admin
+    """
+    import getpass
+
+    print("=== Create Admin Account ===")
+    username = input("Username: ").strip()
+    if not username:
+        print("Error: Username cannot be empty.")
+        return
+
+    existing = User.query.filter_by(username=username).first()
+    if existing:
+        print(f"Error: Username '{username}' already exists.")
+        return
+
+    email = input("Email: ").strip()
+    if not email:
+        print("Error: Email cannot be empty.")
+        return
+
+    name = input("Full name: ").strip()
+    if not name:
+        print("Error: Name cannot be empty.")
+        return
+
+    password = getpass.getpass("Password (min 6 chars): ")
+    if len(password) < 6:
+        print("Error: Password must be at least 6 characters.")
+        return
+
+    confirm = getpass.getpass("Confirm password: ")
+    if password != confirm:
+        print("Error: Passwords do not match.")
+        return
+
+    admin = User(
+        username=username,
+        password_hash=generate_password_hash(password),
+        role='admin',
+        name=name,
+        email=email
+    )
+    db.session.add(admin)
+    db.session.commit()
+    print(f"Admin account '{username}' created successfully.")
+
+
 if __name__ == '__main__':
     app.run(debug=True)
