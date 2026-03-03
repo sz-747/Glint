@@ -575,6 +575,18 @@ def get_or_create_tag(name, category):
     return tag
 
 
+def apply_tags(quote, themes_raw, techniques_raw):
+    """Parse comma-separated theme/technique strings and attach tags to a quote."""
+    for name in themes_raw.split(','):
+        tag = get_or_create_tag(name, 'theme')
+        if tag:
+            quote.tags.append(tag)
+    for name in techniques_raw.split(','):
+        tag = get_or_create_tag(name, 'technique')
+        if tag:
+            quote.tags.append(tag)
+
+
 @app.route('/quotes/new', methods=['GET', 'POST'])
 @login_required
 def add_quote():
@@ -604,15 +616,7 @@ def add_quote():
         )
         db.session.add(quote)
 
-        for name in themes_raw.split(','):
-            tag = get_or_create_tag(name, 'theme')
-            if tag:
-                quote.tags.append(tag)
-
-        for name in techniques_raw.split(','):
-            tag = get_or_create_tag(name, 'technique')
-            if tag:
-                quote.tags.append(tag)
+        apply_tags(quote, themes_raw, techniques_raw)
 
         db.session.commit()
 
@@ -653,14 +657,7 @@ def edit_quote(quote_id):
     quote.source_label = source_label
 
     quote.tags.clear()
-    for name in themes_raw.split(','):
-        tag = get_or_create_tag(name, 'theme')
-        if tag:
-            quote.tags.append(tag)
-    for name in techniques_raw.split(','):
-        tag = get_or_create_tag(name, 'technique')
-        if tag:
-            quote.tags.append(tag)
+    apply_tags(quote, themes_raw, techniques_raw)
 
     db.session.commit()
     flash('Quote updated.', 'success')
