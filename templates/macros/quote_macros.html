@@ -1,0 +1,16 @@
+{# Reusable macros for quote tag rendering to avoid duplication across templates #}
+
+{% macro quote_data_attrs(quote) -%}
+data-themes="{% for tag in quote.tags if tag.category == 'theme' %}{{ tag.name }}{% if not loop.last %},{% endif %}{% endfor %}"
+data-techniques="{% for tag in quote.tags if tag.category == 'technique' %}{{ tag.name }}{% if not loop.last %},{% endif %}{% endfor %}"
+data-search-text="{{ quote.quote_text|lower }} {{ (quote.source_label or '')|lower }} {% for tag in quote.tags %}{{ tag.name }} {% endfor %}"
+{%- endmacro %}
+
+{% macro quote_tag_badges(quote) %}
+{% for tag in quote.tags if tag.category == 'theme' %}
+<span class="qb-tag qb-tag-theme">{{ tag.name|capitalize }}</span>
+{% endfor %}
+{% for tag in quote.tags if tag.category == 'technique' %}
+<span class="qb-tag qb-tag-technique">{{ tag.name|capitalize }}</span>
+{% endfor %}
+{% endmacro %}
