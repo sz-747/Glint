@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block title %}Dashboard{% endblock %} {% block
+{% extends "base.html" %} {% from "macros/quote_macros.html" import quote_data_attrs, quote_tag_badges %} {% block title %}Dashboard{% endblock %} {% block
 container_class %}container-dashboard{% endblock %} {% block content %}
 <div class="dashboard-shell" data-dashboard-shell>
   <aside class="panel panel-left" data-panel="left">
@@ -320,23 +320,14 @@ container_class %}container-dashboard{% endblock %} {% block content %}
         {% for quote in quotes %}
         <li
           class="quote-item"
-          data-search-text="{{ quote.quote_text|lower }} {{ (quote.source_label or '')|lower }} {% for tag in quote.tags %}{{ tag.name }} {% endfor %}"
-          data-themes="{% for tag in quote.tags if tag.category == 'theme' %}{{ tag.name }}{% if not loop.last %},{% endif %}{% endfor %}"
-          data-techniques="{% for tag in quote.tags if tag.category == 'technique' %}{{ tag.name }}{% if not loop.last %},{% endif %}{% endfor %}"
+          {{ quote_data_attrs(quote) }}
         >
           <p class="quote-text">"{{ quote.quote_text }}"</p>
           {% if quote.source_label %}
           <p class="quote-source-label">&mdash; {{ quote.source_label }}</p>
           {% endif %} {% if quote.tags %}
           <div class="quote-tags">
-            {% for tag in quote.tags if tag.category == 'theme' %}
-            <span class="qb-tag qb-tag-theme">{{ tag.name|capitalize }}</span>
-            {% endfor %} {% for tag in quote.tags if tag.category == 'technique'
-            %}
-            <span class="qb-tag qb-tag-technique"
-              >{{ tag.name|capitalize }}</span
-            >
-            {% endfor %}
+            {{ quote_tag_badges(quote) }}
           </div>
           {% endif %}
           <button
