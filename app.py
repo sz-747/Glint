@@ -48,7 +48,11 @@ def sanitize_html(html):
 app = Flask(__name__)
 
 # Configure SQLite database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///glint.db'
+# On Vercel, use /tmp (the only writable directory) for the SQLite file
+if os.environ.get('VERCEL'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/glint.db'
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///glint.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # SECRET_KEY must be set via environment variable for session/CSRF security.
 # Fallback generates a random key per-process (sessions won't persist across restarts).
