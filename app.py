@@ -16,7 +16,6 @@ Routes:
     /admin/quotes/add        - Add/merge quote-analysis entries (admin only)
     /api/quotes/search?q=    - Keyword search and ranking of quotes (JSON API)
 
-Author: Steve
 Date: February 2025
 """
 
