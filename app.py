@@ -13,8 +13,6 @@ Routes:
     /document/upload         - Upload a .txt file as a document
     /admin                   - Administrator panel (admin only)
     /admin/delete_user/<id>  - Delete a user account (admin only)
-    /admin/quotes/add        - Add/merge quote-analysis entries (admin only)
-    /api/quotes/search?q=    - Keyword search and ranking of quotes (JSON API)
 
 Date: February 2025
 """
@@ -33,7 +31,6 @@ from werkzeug.utils import secure_filename
 import bleach
 
 from models import db, User, Document, QuoteEntry, AnalysisChunk, Tag, quote_tags
-from quote_engine import search_quotes
 
 # Allowed HTML tags for the contenteditable editor — everything else is stripped
 ALLOWED_TAGS = ['b', 'i', 'u', 'strong', 'em', 'h1', 'h2', 'h3', 'p', 'br',
@@ -260,9 +257,6 @@ def dashboard():
     elif documents and selected_doc_id is None:
         selected_document = documents[0]
 
-    total_quotes = QuoteEntry.query.count()
-    total_chunks = AnalysisChunk.query.count()
-
     # Fetch all quotes with their analysis chunks for the quote bank panel
     quotes = QuoteEntry.query.order_by(QuoteEntry.created_at.desc()).all()
     themes = Tag.query.filter_by(category='theme').order_by(Tag.name).all()
@@ -272,8 +266,6 @@ def dashboard():
         'dashboard.html',
         documents=documents,
         selected_document=selected_document,
-        total_quotes=total_quotes,
-        total_chunks=total_chunks,
         quotes=quotes,
         themes=themes,
         techniques=techniques
@@ -439,14 +431,12 @@ def admin():
     total_users = User.query.filter_by(role='user').count()
     total_documents = Document.query.count()
     total_quotes = QuoteEntry.query.count()
-    total_chunks = AnalysisChunk.query.count()
     total_words = db.session.query(db.func.sum(Document.word_count)).scalar() or 0
 
     stats = {
         'total_users': total_users,
         'total_documents': total_documents,
         'total_quotes': total_quotes,
-        'total_chunks': total_chunks,
         'total_words': total_words,
     }
 
@@ -500,7 +490,7 @@ def admin_delete_document(doc_id):
 
 
 # ============================================
-# Admin Quote Management
+# User Quote Management (CRUD)
 # ============================================
 
 def normalize_text(text):
@@ -508,69 +498,6 @@ def normalize_text(text):
     if text is None:
         return ""
     return " ".join(str(text).lower().split())
-
-@app.route('/admin/quotes/add', methods=['POST'])
-@csrf.exempt  # JSON API — no form token; protected by @login_required + @admin_required
-@login_required
-@admin_required
-def admin_add_quote():
-    """
-    Admin-only route to add a quote with analysis chunks.
-    Blocks duplicate normalized quotes; merges new chunks into existing quotes.
-    """
-
-    data = request.get_json(silent=True)
-    if not data:
-        return jsonify({"error": "Invalid JSON payload."}), 400
-
-    quote_text = (data.get('quote_text') or '').strip()
-    source_label = (data.get('source_label') or '').strip() or None
-    analysis_chunks = data.get('analysis_chunks', [])
-
-    if not quote_text:
-        return jsonify({"error": "quote_text is required."}), 400
-    if not isinstance(analysis_chunks, list) or not analysis_chunks:
-        return jsonify({"error": "analysis_chunks must be a non-empty list of strings."}), 400
-
-    normalized = normalize_text(quote_text)
-    existing = QuoteEntry.query.filter_by(quote_normalized=normalized).first()
-
-    if existing:
-        # Merge: add only new chunks
-        existing_texts = {normalize_text(c.chunk_text) for c in existing.analysis_chunks}
-        added = 0
-        for chunk_str in analysis_chunks:
-            chunk_str = str(chunk_str).strip()
-            if not chunk_str:
-                continue
-            if normalize_text(chunk_str) not in existing_texts:
-                db.session.add(AnalysisChunk(quote_id=existing.id, chunk_text=chunk_str))
-                existing_texts.add(normalize_text(chunk_str))
-                added += 1
-        db.session.commit()
-        return jsonify({"status": "merged", "quote_id": existing.id, "chunks_added": added})
-
-    quote = QuoteEntry(
-        user_id=current_user.id,
-        quote_text=quote_text,
-        quote_normalized=normalized,
-        source_label=source_label
-    )
-    db.session.add(quote)
-    db.session.flush()  # get quote.id before adding chunks
-
-    for chunk_str in analysis_chunks:
-        chunk_str = str(chunk_str).strip()
-        if chunk_str:
-            db.session.add(AnalysisChunk(quote_id=quote.id, chunk_text=chunk_str))
-
-    db.session.commit()
-    return jsonify({"status": "created", "quote_id": quote.id, "chunks_added": len(analysis_chunks)})
-
-
-# ============================================
-# User Quote Management (CRUD)
-# ============================================
 
 def get_or_create_tag(name, category):
     """Get an existing tag or create a new one. Name is stored lowercase-stripped."""
@@ -725,26 +652,6 @@ def quote_bank():
     themes = Tag.query.filter_by(category='theme').order_by(Tag.name).all()
     techniques = Tag.query.filter_by(category='technique').order_by(Tag.name).all()
     return render_template('quote_bank.html', quotes=quotes, themes=themes, techniques=techniques)
-
-
-# ============================================
-# Quote Search API
-# ============================================
-
-@app.route('/api/quotes/search')
-@login_required
-def api_search_quotes():
-    """
-    JSON API endpoint for the quote search engine.
-    Accepts a query string parameter 'q' and returns ranked quote results.
-    Protected by @login_required — unauthenticated requests are redirected.
-    """
-    query = request.args.get('q', '').strip()
-    if not query:
-        return jsonify([])
-
-    results = search_quotes(query, limit=5)
-    return jsonify(results)
 
 
 # ============================================
