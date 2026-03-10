@@ -669,6 +669,20 @@ def quote_bank():
 with app.app_context():
     db.create_all()
 
+    # Auto-seed admin account from environment variables (for Render deployment)
+    admin_user = os.environ.get('ADMIN_USERNAME')
+    admin_pass = os.environ.get('ADMIN_PASSWORD')
+    if admin_user and admin_pass:
+        if not User.query.filter_by(username=admin_user).first():
+            seed_admin = User(
+                username=admin_user,
+                password_hash=generate_password_hash(admin_pass),
+                role='admin',
+                name='Admin',
+                email='admin@glint.app'
+            )
+            db.session.add(seed_admin)
+            db.session.commit()
 
 
 # ============================================
