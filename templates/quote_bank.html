@@ -1,5 +1,7 @@
-{% extends "base.html" %} {% from "macros/quote_macros.html" import quote_data_attrs, quote_tag_badges %} {% block title %}Quote Bank - Glint{% endblock %} {%
-block container_class %}container-quote-bank{% endblock %} {% block content %}
+{% extends "base.html" %} {% from "macros/quote_macros.html" import
+quote_data_attrs, quote_tag_badges %} {% block title %}Quote Bank - Glint{%
+endblock %} {% block container_class %}container-quote-bank{% endblock %} {%
+block content %}
 <div class="qb-header">
   <div>
     <h1 class="qb-title">Quote Bank</h1>
@@ -39,17 +41,12 @@ block container_class %}container-quote-bank{% endblock %} {% block content %}
 
 <div class="qb-grid">
   {% for quote in quotes %}
-  <div
-    class="qb-card"
-    {{ quote_data_attrs(quote) }}
-  >
+  <div class="qb-card" {{ quote_data_attrs(quote) }}>
     <p class="qb-card-quote">"{{ quote.quote_text }}"</p>
     {% if quote.source_label %}
     <p class="qb-card-source">&mdash; {{ quote.source_label }}</p>
     {% endif %}
-    <div class="qb-card-tags">
-      {{ quote_tag_badges(quote) }}
-    </div>
+    <div class="qb-card-tags">{{ quote_tag_badges(quote) }}</div>
     <div class="qb-card-actions">
       <button
         type="button"
