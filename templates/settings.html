@@ -7,15 +7,23 @@
   <div class="auth-card">
     <h2>My Profile</h2>
 
-    <div class="form-group">
-      <label>Full Name</label>
-      <p>{{ current_user.name }}</p>
-    </div>
+    <form method="POST" action="{{ url_for('settings') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
-    <div class="form-group">
-      <label>Username</label>
-      <p>{{ current_user.username }}</p>
-    </div>
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" name="name" value="{{ current_user.name }}" required />
+      </div>
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" value="{{ current_user.username }}" required />
+      </div>
+
+      <button type="submit" class="btn-primary">Save Changes</button>
+    </form>
+
+    <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid #ccc;" />
 
     <div class="form-group">
       <label>Email</label>

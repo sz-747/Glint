@@ -690,10 +690,30 @@ def delete_quote(quote_id):
     return redirect(url_for('quote_bank'))
 
 
-@app.route('/settings')
+@app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
-    """Settings page - displays the current user's profile information."""
+    """Settings page - displays and allows editing of profile information."""
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        username = request.form.get('username', '').strip()
+
+        if not name or not username:
+            flash('Name and username cannot be empty.', 'error')
+            return redirect(url_for('settings'))
+
+        if username != current_user.username:
+            existing = User.query.filter_by(username=username).first()
+            if existing:
+                flash('Username already taken.', 'error')
+                return redirect(url_for('settings'))
+
+        current_user.name = name
+        current_user.username = username
+        db.session.commit()
+        flash('Profile updated successfully.', 'success')
+        return redirect(url_for('settings'))
+
     return render_template('settings.html')
 
 
