@@ -690,6 +690,13 @@ def delete_quote(quote_id):
     return redirect(url_for('quote_bank'))
 
 
+@app.route('/settings')
+@login_required
+def settings():
+    """Settings page - displays the current user's profile information."""
+    return render_template('settings.html')
+
+
 @app.route('/quotes')
 @login_required
 def quote_bank():

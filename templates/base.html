@@ -39,6 +39,7 @@
         </form>
         <a href="{{ url_for('dashboard') }}">Dashboard</a>
         <a href="{{ url_for('quote_bank') }}">Quote Bank</a>
+        <a href="{{ url_for('settings') }}">Settings</a>
         {% endif %}
         <form method="POST" action="{{ url_for('logout') }}" class="nav-logout-form">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
