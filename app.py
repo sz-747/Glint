@@ -199,15 +199,13 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        remember = request.form.get('remember', False)
-
         # Find user by username
         user = User.query.filter_by(username=username).first()
 
         # Verify password hash against submitted password
         if user and check_password_hash(user.password_hash, password or ''):
             # Log the user in and create a session
-            login_user(user, remember=remember)
+            login_user(user)
             flash('Logged in successfully!', 'success')
 
             # Redirect admin to admin panel, regular users to dashboard
