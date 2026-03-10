@@ -57,12 +57,18 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # SECRET_KEY must be set via environment variable for session/CSRF security.
 # Fallback generates a random key per-process (sessions won't persist across restarts).
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or os.urandom(32).hex()
+# Session cookie security settings - required for Vercel (serverless) deployments
+app.config['SESSION_COOKIE_SECURE'] = True    # Send cookie over HTTPS only
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JS access to cookie
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax' # CSRF protection
+app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1-hour session lifetime
 
 # Initialize extensions
 db.init_app(app)
 csrf = CSRFProtect(app)  # Enable CSRF protection on all POST forms
 login_manager = LoginManager(app)  # Initialize Flask-Login
 login_manager.login_view = 'login'
+login_manager.session_protection = 'strong'
 
 
 @app.errorhandler(CSRFError)
@@ -721,6 +727,32 @@ def api_search_quotes():
 # Create database tables if they don't exist
 with app.app_context():
     db.create_all()
+
+    # On Vercel, /tmp is ephemeral — seed default accounts so login always works.
+    if os.environ.get('VERCEL'):
+        if not User.query.filter_by(username='admin').first():
+            admin_pw = os.environ.get('ADMIN_PASSWORD', 'admin123')
+            seed_admin = User(
+                username='admin',
+                password_hash=generate_password_hash(admin_pw),
+                role='admin',
+                name='Admin',
+                email='admin@glint.app'
+            )
+            db.session.add(seed_admin)
+
+        if not User.query.filter_by(username='user').first():
+            user_pw = os.environ.get('USER_PASSWORD', 'user123')
+            seed_user = User(
+                username='user',
+                password_hash=generate_password_hash(user_pw),
+                role='user',
+                name='Default User',
+                email='user@glint.app'
+            )
+            db.session.add(seed_user)
+
+        db.session.commit()
 
 
 # ============================================
