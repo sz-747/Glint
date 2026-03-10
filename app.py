@@ -257,10 +257,11 @@ def dashboard():
     elif documents and selected_doc_id is None:
         selected_document = documents[0]
 
-    # Fetch all quotes with their analysis chunks for the quote bank panel
-    quotes = QuoteEntry.query.order_by(QuoteEntry.created_at.desc()).all()
-    themes = Tag.query.filter_by(category='theme').order_by(Tag.name).all()
-    techniques = Tag.query.filter_by(category='technique').order_by(Tag.name).all()
+    # Fetch current user's quotes with their analysis chunks for the quote bank panel
+    quotes = QuoteEntry.query.filter_by(user_id=current_user.id).order_by(QuoteEntry.created_at.desc()).all()
+    user_quote_ids = [q.id for q in quotes]
+    themes = Tag.query.filter_by(category='theme').filter(Tag.quotes.any(QuoteEntry.id.in_(user_quote_ids))).order_by(Tag.name).all() if user_quote_ids else []
+    techniques = Tag.query.filter_by(category='technique').filter(Tag.quotes.any(QuoteEntry.id.in_(user_quote_ids))).order_by(Tag.name).all() if user_quote_ids else []
 
     return render_template(
         'dashboard.html',
@@ -538,10 +539,10 @@ def add_quote():
             return redirect(url_for('add_quote'))
 
         normalized = normalize_text(quote_text)
-        existing = QuoteEntry.query.filter_by(quote_normalized=normalized).first()
+        existing = QuoteEntry.query.filter_by(quote_normalized=normalized, user_id=current_user.id).first()
 
         if existing:
-            flash('This quote already exists in the bank.', 'error')
+            flash('This quote already exists in your bank.', 'error')
             return redirect(url_for('add_quote'))
 
         quote = QuoteEntry(
@@ -553,6 +554,11 @@ def add_quote():
         db.session.add(quote)
 
         apply_tags(quote, themes_raw, techniques_raw)
+
+        analysis_text = request.form.get('analysis', '').strip()
+        if analysis_text:
+            db.session.flush()
+            db.session.add(AnalysisChunk(quote_id=quote.id, chunk_text=analysis_text))
 
         db.session.commit()
 
@@ -583,9 +589,9 @@ def edit_quote(quote_id):
         return redirect(url_for('quote_bank'))
 
     normalized = normalize_text(quote_text)
-    existing = QuoteEntry.query.filter_by(quote_normalized=normalized).first()
+    existing = QuoteEntry.query.filter_by(quote_normalized=normalized, user_id=current_user.id).first()
     if existing and existing.id != quote.id:
-        flash('Another quote with this text already exists.', 'error')
+        flash('Another quote with this text already exists in your bank.', 'error')
         return redirect(url_for('quote_bank'))
 
     quote.quote_text = quote_text
@@ -594,6 +600,13 @@ def edit_quote(quote_id):
 
     quote.tags.clear()
     apply_tags(quote, themes_raw, techniques_raw)
+
+    analysis_text = request.form.get('analysis', '').strip()
+    # Replace existing chunks with the single user-provided analysis
+    for chunk in list(quote.analysis_chunks):
+        db.session.delete(chunk)
+    if analysis_text:
+        db.session.add(AnalysisChunk(quote_id=quote.id, chunk_text=analysis_text))
 
     db.session.commit()
     flash('Quote updated.', 'success')
@@ -648,9 +661,10 @@ def settings():
 @login_required
 def quote_bank():
     """Dedicated Quote Bank page with filtering by themes and techniques."""
-    quotes = QuoteEntry.query.order_by(QuoteEntry.created_at.desc()).all()
-    themes = Tag.query.filter_by(category='theme').order_by(Tag.name).all()
-    techniques = Tag.query.filter_by(category='technique').order_by(Tag.name).all()
+    quotes = QuoteEntry.query.filter_by(user_id=current_user.id).order_by(QuoteEntry.created_at.desc()).all()
+    user_quote_ids = [q.id for q in quotes]
+    themes = Tag.query.filter_by(category='theme').filter(Tag.quotes.any(QuoteEntry.id.in_(user_quote_ids))).order_by(Tag.name).all() if user_quote_ids else []
+    techniques = Tag.query.filter_by(category='technique').filter(Tag.quotes.any(QuoteEntry.id.in_(user_quote_ids))).order_by(Tag.name).all() if user_quote_ids else []
     return render_template('quote_bank.html', quotes=quotes, themes=themes, techniques=techniques)
 
 

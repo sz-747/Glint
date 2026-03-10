@@ -61,6 +61,7 @@ block container_class %}container-quote-bank{% endblock %} {% block content %}
         data-source="{{ (quote.source_label or '') | e }}"
         data-themes="{% for tag in quote.tags if tag.category == 'theme' %}{{ tag.name }}{% if not loop.last %}, {% endif %}{% endfor %}"
         data-techniques="{% for tag in quote.tags if tag.category == 'technique' %}{{ tag.name }}{% if not loop.last %}, {% endif %}{% endfor %}"
+        data-analysis="{{ (quote.analysis_chunks[0].chunk_text if quote.analysis_chunks else '') | e }}"
       >
         &#9998;
       </button>
@@ -140,6 +141,16 @@ block container_class %}container-quote-bank{% endblock %} {% block content %}
             placeholder="e.g. Metaphor"
           />
         </div>
+      </div>
+      <div class="form-group">
+        <label for="modal_analysis">ANALYSIS</label>
+        <textarea
+          id="modal_analysis"
+          name="analysis"
+          class="form-control"
+          placeholder="Write your analysis of this quote..."
+          rows="3"
+        ></textarea>
       </div>
       <div class="form-group">
         <label for="modal_tags"
@@ -275,6 +286,8 @@ block container_class %}container-quote-bank{% endblock %} {% block content %}
         document.getElementById("modal_themes").value = this.dataset.themes;
         document.getElementById("modal_techniques").value =
           this.dataset.techniques;
+        document.getElementById("modal_analysis").value =
+          this.dataset.analysis || "";
         overlay.hidden = false;
       });
     });
