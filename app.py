@@ -1,26 +1,25 @@
-"""
-Glint - Quote Analysis Retrieval Application
+# Glint - Quote Analysis Retrieval Application
+#
+# Routes:
+#     /                        - Home page (redirects based on auth status)
+#     /signup                  - User registration
+#     /login                   - User authentication
+#     /logout                  - User logout
+#     /dashboard               - User document management (CRUD)
+#     /document/new            - Create a new document
+#     /document/<id>/update    - Save document content
+#     /document/delete/<id>    - Delete a document
+#     /document/upload         - Upload a .txt file as a document
+#     /admin                   - Administrator panel (admin only)
+#     /admin/delete_user/<id>  - Delete a user account (admin only)
+#
+# Date: February 2025
 
-Routes:
-    /                        - Home page (redirects based on auth status)
-    /signup                  - User registration
-    /login                   - User authentication
-    /logout                  - User logout
-    /dashboard               - User document management (CRUD)
-    /document/new            - Create a new document
-    /document/<id>/update    - Save document content
-    /document/delete/<id>    - Delete a document
-    /document/upload         - Upload a .txt file as a document
-    /admin                   - Administrator panel (admin only)
-    /admin/delete_user/<id>  - Delete a user account (admin only)
 
-Date: February 2025
-"""
-
-import os
-import re
-from pathlib import Path
-from functools import wraps
+import os # access env variables
+import re # regex for stripping HTML tags when calculating word count
+from pathlib import Path # extract filename stem from uploaded .txt files
+from functools import wraps # preserve function metadata when using admin_required decorator
 
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -28,9 +27,10 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
-import bleach
+import bleach #sanitise html input from the editor
 
 from models import db, User, Document, QuoteEntry, AnalysisChunk, Tag, quote_tags
+#SQL alchemy database instance and all model classes 
 
 # Allowed HTML tags for the contenteditable editor — everything else is stripped
 ALLOWED_TAGS = ['b', 'i', 'u', 'strong', 'em', 'h1', 'h2', 'h3', 'p', 'br',
@@ -39,7 +39,7 @@ ALLOWED_ATTRS = {}  # No attributes allowed — strips event handlers, style, et
 
 
 def sanitize_html(html):
-    """Strip all tags/attributes except safe formatting ones."""
+    # Strip all tags/attributes except safe formatting ones.
     return bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
 
 # ============================================================
@@ -69,7 +69,7 @@ login_manager.session_protection = 'strong'
 
 @app.errorhandler(CSRFError)
 def handle_csrf_error(e):
-    """Return a clear error when a CSRF token is missing or invalid."""
+    # Return a clear error when a CSRF token is missing or invalid.
     flash('Session expired or invalid request. Please try again.', 'error')
     return redirect(request.referrer or url_for('home'))
 
@@ -78,21 +78,18 @@ def handle_csrf_error(e):
 # This tells Flask-Login how to reload the user object from the user ID stored in the session
 @login_manager.user_loader
 def load_user(user_id):
-    """
-    Load user by ID for Flask-Login.
-    Called on each request to retrieve the current user from the session.
-    """
+    # Load user by ID for Flask-Login.
+    # Called on each request to retrieve the current user from the session.
     return User.query.get(int(user_id))
 
 
 def admin_required(f):
-    """
-    Decorator to require admin role for route access.
-    Must be used after @login_required so current_user is guaranteed loaded.
-    Returns 403 Forbidden if the authenticated user is not an admin.
-    """
+    # Decorator to require admin role for route access.
+    # Must be used after @login_required so current_user is guaranteed loaded.
+    # Returns 403 Forbidden if the authenticated user is not an admin.
     @wraps(f)
-    def decorated_function(*args, **kwargs):
+    def decorated_function(*args, **kwargs):  #args and kwargs: collect and pass thru whatever arguments are given
+            #the decorator works with any function regardless of what parameters it takes
         if not current_user.is_authenticated:
             return redirect(url_for('login'))
         if current_user.role != 'admin':
@@ -103,7 +100,7 @@ def admin_required(f):
 
 @app.errorhandler(403)
 def forbidden(e):
-    """Custom 403 Forbidden error page for unauthorized admin access attempts."""
+    # Custom 403 Forbidden error page for unauthorized admin access attempts.
     return render_template('403.html'), 403
 
 
@@ -113,10 +110,8 @@ def forbidden(e):
 
 @app.route('/')
 def home():
-    """
-    Home route - redirects authenticated users to their appropriate dashboard.
-    Unauthenticated users see the landing page.
-    """
+    # Home route - redirects authenticated users to their appropriate dashboard.
+    # Unauthenticated users see the landing page.
     if current_user.is_authenticated:
         if current_user.role == 'admin':
             return redirect(url_for('admin'))
@@ -126,10 +121,8 @@ def home():
 
 @app.route('/home')
 def landing():
-    """
-    Landing page route - displays marketing page for unauthenticated users.
-    Authenticated users are redirected to their dashboard.
-    """
+    # Landing page route - displays marketing page for unauthenticated users.
+    # Authenticated users are redirected to their dashboard.
     if current_user.is_authenticated:
         if current_user.role == 'admin':
             return redirect(url_for('admin'))
@@ -138,12 +131,10 @@ def landing():
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    """
-    User registration route.
-    - GET: Display signup form
-    - POST: Create new user account with hashed password
-    Security: Uses Werkzeug password hashing with automatic salting
-    """
+    # User registration route.
+    # - GET: Display signup form
+    # - POST: Create new user account with hashed password
+    # Security: Uses Werkzeug password hashing with automatic salting
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -170,7 +161,7 @@ def signup():
             return redirect(url_for('signup'))
 
         # Hardcode role to 'user' — never trust client input for role assignment
-        # Admin accounts should only be created via /admin/create_user
+        # Admin accounts should only be created thru command flask create-admin OR thru pre-set env variables on render
         role = 'user'
 
         # Hash password for secure database storage
@@ -189,12 +180,10 @@ def signup():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """
-    User login route.
-    - GET: Display login form
-    - POST: Authenticate user and create session
-    Security: Verifies password hashes using Werkzeug
-    """
+    # User login route.
+    # - GET: Display login form
+    # - POST: Authenticate user and create session
+    # Security: Verifies password hashes using Werkzeug
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -220,10 +209,8 @@ def login():
 @app.route('/logout', methods=['POST'])
 @login_required  # Only authenticated users can logout
 def logout():
-    """
-    User logout route (POST-only to prevent CSRF logout via embedded images/links).
-    Destroys the user session and redirects to landing page.
-    """
+    # User logout route (POST-only to prevent CSRF logout via embedded images/links).
+    # Destroys the user session and redirects to landing page.
     logout_user()
     flash('Logged out successfully.', 'success')
     return redirect(url_for('landing'))
@@ -235,24 +222,26 @@ def logout():
 @app.route('/dashboard')
 @login_required  # Requires user to be logged in
 def dashboard():
-    """
-    User dashboard with document list and selected document editor.
-    """
-    selected_doc_id = request.args.get('doc_id', type=int)
+    # User dashboard with document list and selected document editor.
+    selected_doc_id = request.args.get('doc_id', type=int) # readsthe url for a doc_id
     documents = (
-        Document.query
+        Document.query # gets all docs belonging to the logged-in user
         .filter_by(user_id=current_user.id)
-        .order_by(Document.last_modified.desc())
+        .order_by(Document.last_modified.desc()) #sort by the most recently modified
         .all()
     )
+    
 
     selected_document = None
-    if selected_doc_id is not None and documents:
+    if selected_doc_id is not None and documents: #decides which docs to show 
         selected_document = next((doc for doc in documents if doc.id == selected_doc_id), None)
         if selected_document is None:
             flash('Requested document was not found.', 'error')
     elif documents and selected_doc_id is None:
         selected_document = documents[0]
+        
+    #if a doc_id was in URL --> find that doc and flash error if it doesnt exist
+    #if no doc_id given --> just open the first doc by default
 
     # Fetch current user's quotes with their analysis chunks for the quote bank panel
     quotes = QuoteEntry.query.filter_by(user_id=current_user.id).order_by(QuoteEntry.created_at.desc()).all()
@@ -260,6 +249,7 @@ def dashboard():
     themes = Tag.query.filter_by(category='theme').filter(Tag.quotes.any(QuoteEntry.id.in_(user_quote_ids))).order_by(Tag.name).all() if user_quote_ids else []
     techniques = Tag.query.filter_by(category='technique').filter(Tag.quotes.any(QuoteEntry.id.in_(user_quote_ids))).order_by(Tag.name).all() if user_quote_ids else []
 
+    # find what teheme and technique tags are attached to those quote for the quote bank panel
     return render_template(
         'dashboard.html',
         documents=documents,
@@ -273,7 +263,7 @@ def dashboard():
 @app.route('/document/new', methods=['POST'])
 @login_required
 def new_document():
-    """Create a new empty document for the current user."""
+    # Create a new empty document for the current user
     title = request.form.get('title', '').strip() or 'Untitled Document'
     document = Document(user_id=current_user.id, title=title, content='', word_count=0)
     db.session.add(document)
@@ -285,7 +275,7 @@ def new_document():
 @app.route('/document/<int:doc_id>/update', methods=['POST'])
 @login_required
 def update_document(doc_id):
-    """Update title/content for a document the current user owns."""
+    # Update title/content for a document the current user owns.
     document = Document.query.get_or_404(doc_id)
     if document.user_id != current_user.id:
         flash('Unauthorized document access.', 'error')
@@ -311,7 +301,7 @@ def update_document(doc_id):
 @app.route('/document/delete/<int:doc_id>', methods=['POST'])
 @login_required
 def delete_document(doc_id):
-    """Delete a document if it belongs to the current user."""
+    # Delete a document if it belongs to the current user.
     document = Document.query.get_or_404(doc_id)
     if document.user_id != current_user.id:
         flash('Unauthorized document access.', 'error')
@@ -327,9 +317,7 @@ def delete_document(doc_id):
 @app.route('/document/upload', methods=['POST'])
 @login_required
 def upload_document():
-    """
-    Upload a .txt file and create a document from its contents.
-    """
+    # Upload a .txt file and create a document from its contents.
     file = request.files.get('file')
     if file is None or file.filename is None or file.filename.strip() == '':
         flash('Please choose a text file to upload.', 'error')
@@ -368,10 +356,8 @@ def upload_document():
 @login_required
 @admin_required
 def create_user():
-    """
-    Create a new user from the admin panel.
-    Accepts username and password, hashes the password before storing.
-    """
+    # Create a new user from the admin panel.
+    # Accepts username and password, hashes the password before storing.
     username = request.form.get('username', '').strip()
     password = request.form.get('password', '')
     role = request.form.get('role', 'user')
@@ -410,11 +396,9 @@ def create_user():
 @login_required
 @admin_required
 def admin():
-    """
-    Admin dashboard showing system statistics and user management table.
-    Protected by both @login_required and @admin_required decorators.
-    Non-admin users receive a 403 Forbidden response.
-    """
+    # Admin dashboard showing system statistics and user management table.
+    # Protected by both @login_required and @admin_required decorators.
+    # Non-admin users receive a 403 Forbidden response.
     search_query = request.args.get('q', '').strip()
 
     # Get all users ordered by ID for the management table
@@ -449,11 +433,9 @@ def admin():
 @login_required
 @admin_required
 def delete_user(user_id):
-    """
-    Delete a user and all their related data (documents, quotes, suggestion logs).
-    Cascade delete is handled by SQLAlchemy relationship configuration.
-    Admins cannot delete their own account to prevent lockout.
-    """
+    # Delete a user and all their related data (documents, quotes, suggestion logs).
+    # Cascade delete is handled by SQLAlchemy relationship configuration.
+    # Admins cannot delete their own account to prevent lockout.
     user = User.query.get_or_404(user_id)
 
     # Safety check: prevent admin from deleting themselves
@@ -476,9 +458,7 @@ def delete_user(user_id):
 @login_required
 @admin_required
 def admin_delete_document(doc_id):
-    """
-    Delete a document. Admins can delete any document.
-    """
+    # Delete a document. Admins can delete any document.
     document = Document.query.get_or_404(doc_id)
     title = document.title
     try:
@@ -496,13 +476,13 @@ def admin_delete_document(doc_id):
 # ============================================================
 
 def normalize_text(text):
-    """Normalize text for quote matching: lowercase and collapse whitespace."""
+    # Normalize text for quote matching: lowercase and collapse whitespace.
     if text is None:
         return ""
     return " ".join(str(text).lower().split())
 
 def get_or_create_tag(name, category):
-    """Get an existing tag or create a new one. Name is stored lowercase-stripped."""
+    # Get an existing tag or create a new one. Name is stored lowercase-stripped.
     name = name.strip().lower()
     if not name:
         return None
@@ -514,7 +494,7 @@ def get_or_create_tag(name, category):
 
 
 def apply_tags(quote, themes_raw, techniques_raw):
-    """Parse comma-separated theme/technique strings and attach tags to a quote."""
+    # Parse comma-separated theme/technique strings and attach tags to a quote.
     for name in themes_raw.split(','):
         tag = get_or_create_tag(name, 'theme')
         if tag:
@@ -528,7 +508,7 @@ def apply_tags(quote, themes_raw, techniques_raw):
 @app.route('/quotes/new', methods=['GET', 'POST'])
 @login_required
 def add_quote():
-    """Display the quote creation page or process quote submission."""
+    # Display the quote creation page or process quote submission.
     if request.method == 'POST':
         quote_text = request.form.get('quote_text', '').strip()
         source_label = request.form.get('source_label', '').strip() or None
@@ -572,7 +552,7 @@ def add_quote():
 @app.route('/quotes/edit/<int:quote_id>', methods=['POST'])
 @login_required
 def edit_quote(quote_id):
-    """Update an existing quote's text, source, and tags."""
+    # Update an existing quote's text, source, and tags.
     quote = QuoteEntry.query.get_or_404(quote_id)
 
     # Ownership check: only the quote owner or an admin can edit
@@ -617,7 +597,7 @@ def edit_quote(quote_id):
 @app.route('/quotes/delete/<int:quote_id>', methods=['POST'])
 @login_required
 def delete_quote(quote_id):
-    """Delete a quote if the current user owns it or is an admin."""
+    # Delete a quote if the current user owns it or is an admin.
     quote = QuoteEntry.query.get_or_404(quote_id)
 
     # Ownership check: only the quote owner or an admin can delete
@@ -638,7 +618,7 @@ def delete_quote(quote_id):
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
-    """Settings page - displays and allows editing of profile information."""
+    # Settings page - displays and allows editing of profile information.
     if request.method == 'POST':
         name = request.form.get('name', '').strip()
         username = request.form.get('username', '').strip()
@@ -665,7 +645,7 @@ def settings():
 @app.route('/quotes')
 @login_required
 def quote_bank():
-    """Dedicated Quote Bank page with filtering by themes and techniques."""
+    # Dedicated Quote Bank page with filtering by themes and techniques.
     quotes = QuoteEntry.query.filter_by(user_id=current_user.id).order_by(QuoteEntry.created_at.desc()).all()
     user_quote_ids = [q.id for q in quotes]
     themes = Tag.query.filter_by(category='theme').filter(Tag.quotes.any(QuoteEntry.id.in_(user_quote_ids))).order_by(Tag.name).all() if user_quote_ids else []
@@ -705,10 +685,8 @@ with app.app_context():
 
 @app.cli.command('create-admin')
 def create_admin():
-    """Create the first admin account from the terminal.
-
-    Usage: flask create-admin
-    """
+    # Create the first admin account from the terminal.
+    # Usage: flask create-admin
     import getpass
 
     print("=== Create Admin Account ===")
