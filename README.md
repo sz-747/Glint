@@ -11,8 +11,5 @@ Analysis is pre-set in the database for each quote. There will be a suggestive a
 
 install dependencies with: py -m pip install -r requirements.txt
 
-Load starter quote-analysis rows into SQLite once: .\venv\Scripts\python.exe scripts\backfill_quotes.py
-
 Notes:
-- App startup now creates tables but does not auto-seed quote data.
-- If there are no admins then use the flask create-admin command to create the first 
+- If there are no admins then use the flask create-admin command to create the first
