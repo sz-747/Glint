@@ -680,7 +680,8 @@ with app.app_context():
                 role='admin',
                 name='Admin',
                 gender='Other',
-                email='admin@glint.app'
+                email='admin@glint.app',
+                address='N/A'
             )
             db.session.add(seed_admin)
             db.session.commit()
@@ -735,7 +736,8 @@ def create_admin():
         role='admin',
         name=name,
         gender='Other',
-        email=email
+        email=email,
+        address='N/A'
     )
     db.session.add(admin)
     db.session.commit()
