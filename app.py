@@ -42,6 +42,10 @@ def sanitize_html(html):
     """Strip all tags/attributes except safe formatting ones."""
     return bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
 
+# ============================================================
+# APP CONFIGURATION & EXTENSIONS
+# ============================================================
+
 app = Flask(__name__)
 
 # Configure SQLite database
@@ -103,9 +107,9 @@ def forbidden(e):
     return render_template('403.html'), 403
 
 
-# ============================================
-# Authentication Routes
-# ============================================
+# ============================================================
+# AUTHENTICATION ROUTES (signup, login, logout)
+# ============================================================
 
 @app.route('/')
 def home():
@@ -224,9 +228,9 @@ def logout():
     flash('Logged out successfully.', 'success')
     return redirect(url_for('landing'))
 
-# ============================================
-# Placeholder Routes (to be implemented later)
-# ============================================
+# ============================================================
+# DOCUMENT ROUTES (dashboard, CRUD, upload)
+# ============================================================
 
 @app.route('/dashboard')
 @login_required  # Requires user to be logged in
@@ -356,6 +360,10 @@ def upload_document():
     flash(f'Uploaded "{filename}" as a new document.', 'success')
     return redirect(url_for('dashboard', doc_id=document.id))
 
+# ============================================================
+# ADMIN ROUTES (dashboard, user/document management)
+# ============================================================
+
 @app.route('/admin/create_user', methods=['POST'])
 @login_required
 @admin_required
@@ -483,9 +491,9 @@ def admin_delete_document(doc_id):
     return redirect(url_for('admin'))
 
 
-# ============================================
-# User Quote Management (CRUD)
-# ============================================
+# ============================================================
+# QUOTE ROUTES (CRUD, tagging, quote bank)
+# ============================================================
 
 def normalize_text(text):
     """Normalize text for quote matching: lowercase and collapse whitespace."""
@@ -623,6 +631,10 @@ def delete_quote(quote_id):
     return redirect(url_for('quote_bank'))
 
 
+# ============================================================
+# USER SETTINGS
+# ============================================================
+
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
@@ -661,9 +673,9 @@ def quote_bank():
     return render_template('quote_bank.html', quotes=quotes, themes=themes, techniques=techniques)
 
 
-# ============================================
-# Database Initialization
-# ============================================
+# ============================================================
+# DATABASE INITIALIZATION & SEEDING
+# ============================================================
 
 # Create database tables if they don't exist
 with app.app_context():
@@ -687,9 +699,9 @@ with app.app_context():
             db.session.commit()
 
 
-# ============================================
-# CLI Commands
-# ============================================
+# ============================================================
+# CLI COMMANDS
+# ============================================================
 
 @app.cli.command('create-admin')
 def create_admin():
@@ -743,6 +755,10 @@ def create_admin():
     db.session.commit()
     print(f"Admin account '{username}' created successfully.")
 
+
+# ============================================================
+# APP ENTRY POINT
+# ============================================================
 
 if __name__ == '__main__':
     app.run(debug=True)
