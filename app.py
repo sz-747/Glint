@@ -679,6 +679,7 @@ with app.app_context():
                 password_hash=generate_password_hash(admin_pass),
                 role='admin',
                 name='Admin',
+                gender='Other',
                 email='admin@glint.app'
             )
             db.session.add(seed_admin)
@@ -733,6 +734,7 @@ def create_admin():
         password_hash=generate_password_hash(password),
         role='admin',
         name=name,
+        gender='Other',
         email=email
     )
     db.session.add(admin)
